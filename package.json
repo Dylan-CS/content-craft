@@ -1,0 +1,19 @@
+{
+  "name": "contentcraft-ai",
+  "version": "1.0.0",
+  "description": "AI-powered text rewriting Chrome extension using DeepSeek-V3",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'No build process needed for Chrome extension'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "text-rewriting",
+    "deepseek",
+    "content-creation"
+  ],
+  "author": "ContentCraft Team",
+  "license": "MIT"
+}
