@@ -45,8 +45,17 @@ function showNotification(message, isError = false) {
 }
 
 function replaceSelectedText(newText) {
+  const selection = window.getSelection();
+  
+  if (!selection.rangeCount || selection.toString().trim() === '') {
+    showNotification('Please select text to rewrite', true);
+    return false;
+  }
+  
+  const range = selection.getRangeAt(0);
   const activeElement = document.activeElement;
   
+  // Handle regular input/textarea elements
   if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
     const start = activeElement.selectionStart;
     const end = activeElement.selectionEnd;
@@ -55,14 +64,34 @@ function replaceSelectedText(newText) {
     const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
     
     activeElement.value = newValue;
-    
     activeElement.selectionStart = start;
     activeElement.selectionEnd = start + newText.length;
-    
     activeElement.focus();
-    return true; // Success
-  } else {
-    showNotification('Please select text in an input field', true);
-    return false; // Failure
+    return true;
   }
+  
+  // Handle contenteditable elements and rich text editors
+  if (range && !range.collapsed) {
+    try {
+      range.deleteContents();
+      const textNode = document.createTextNode(newText);
+      range.insertNode(textNode);
+      
+      // Move selection to the end of the inserted text
+      const newRange = document.createRange();
+      newRange.setStartAfter(textNode);
+      newRange.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      
+      return true;
+    } catch (error) {
+      console.error('Error replacing text in contenteditable:', error);
+      showNotification('Failed to replace text in this editor', true);
+      return false;
+    }
+  }
+  
+  showNotification('Please select text in an editable area', true);
+  return false;
 }
