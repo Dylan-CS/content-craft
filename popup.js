@@ -23,14 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   upgradeBtn.addEventListener('click', function() {
-    alert('即将跳转到升级页面...\n\nPro版本功能:\n✅ 无限使用次数\n✅ 更多写作风格\n✅ 优先处理\n✅ 专属支持');
+    alert('Redirecting to upgrade page...\n\nPro Features:\n✅ Unlimited usage\n✅ More writing styles\n✅ Priority processing\n✅ Dedicated support');
   });
 
   resetBtn.addEventListener('click', function() {
-    if (confirm('确定要重置使用计数吗？')) {
+    if (confirm('Are you sure you want to reset the usage count?')) {
       chrome.storage.local.set({ usageCount: 0 }, function() {
         updateUsageDisplay();
-        alert('使用计数已重置！');
+        alert('Usage count has been reset!');
       });
     }
   });
