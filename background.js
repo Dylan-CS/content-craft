@@ -62,7 +62,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 async function callDeepSeekAPI(text) {
   // IMPORTANT: This should call your serverless function, not directly call DeepSeek API
   // Replace this URL with your actual serverless function endpoint
-  const API_URL = 'https://your-serverless-function.vercel.app/api/rewrite';
+  const API_URL = 'https://content-craft-phi.vercel.app/api/rewrite';
   
   try {
     const response = await fetch(API_URL, {
