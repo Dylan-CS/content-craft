@@ -5,7 +5,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
       
     case "RESULT":
-      replaceSelectedText(request.text);
+      const success = replaceSelectedText(request.text);
+      // Send response back to background script
+      if (!success) {
+        chrome.runtime.sendMessage({
+          type: "REPLACEMENT_FAILED"
+        });
+      }
       break;
       
     case "ERROR":
@@ -54,7 +60,9 @@ function replaceSelectedText(newText) {
     activeElement.selectionEnd = start + newText.length;
     
     activeElement.focus();
+    return true; // Success
   } else {
     showNotification('Please select text in an input field', true);
+    return false; // Failure
   }
 }

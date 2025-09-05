@@ -41,14 +41,15 @@ function simulateAIProcessing(text, tabId) {
   setTimeout(() => {
     const rewrittenText = `AI Rewritten: ${text} (This is simulated AI processing)`;
     
-    chrome.tabs.sendMessage(tabId, {
-      type: "RESULT",
-      text: rewrittenText
-    });
-
+    // Count usage now since AI processing was successful
     chrome.storage.local.get(['usageCount'], (result) => {
       const newCount = (result.usageCount || 0) + 1;
       chrome.storage.local.set({ usageCount: newCount });
+    });
+    
+    chrome.tabs.sendMessage(tabId, {
+      type: "RESULT",
+      text: rewrittenText
     });
   }, 1000);
 }
