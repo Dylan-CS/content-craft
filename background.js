@@ -14,54 +14,60 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
       return;
     }
 
-    console.log("Selected text:", selectedText);
+    // Show style selection for right-click menu too
+    chrome.tabs.sendMessage(tab.id, {
+      type: "SHOW_STYLE_SELECTION",
+      text: selectedText
+    });
+  }
+});
+
+// Handle messages from content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "PROCESS_WITH_STYLE") {
+    const { text, style, prompt } = request;
     
     chrome.storage.local.get(['usageCount'], (result) => {
       const usageCount = result.usageCount || 0;
       
       if (usageCount >= 10) {
-        chrome.tabs.sendMessage(tab.id, {
+        chrome.tabs.sendMessage(sender.tab.id, {
           type: "ERROR",
           message: "Free usage limit reached. Please upgrade to Pro version"
         });
         return;
       }
 
-      chrome.tabs.sendMessage(tab.id, {
+      chrome.tabs.sendMessage(sender.tab.id, {
         type: "PROCESSING",
         message: "Processing..."
       });
 
-      // Use simulate for now, replace with callDeepSeekAPI when server is ready
-      simulateAIProcessing(selectedText, tab.id);
-      
-      // When server is ready, use this instead:
-      // callDeepSeekAPI(selectedText)
-      //   .then(rewrittenText => {
-      //     // Count usage on success
-      //     chrome.storage.local.get(['usageCount'], (result) => {
-      //       const newCount = (result.usageCount || 0) + 1;
-      //       chrome.storage.local.set({ usageCount: newCount });
-      //     });
-      //     
-      //     chrome.tabs.sendMessage(tab.id, {
-      //       type: "RESULT",
-      //       text: rewrittenText
-      //     });
-      //   })
-      //   .catch(error => {
-      //     chrome.tabs.sendMessage(tab.id, {
-      //       type: "ERROR",
-      //       message: `API Error: ${error.message}`
-      //     });
-      //   });
+      // Use actual API call
+      callDeepSeekAPI(text, style, prompt)
+        .then(rewrittenText => {
+          // Count usage on success
+          chrome.storage.local.get(['usageCount'], (result) => {
+            const newCount = (result.usageCount || 0) + 1;
+            chrome.storage.local.set({ usageCount: newCount });
+          });
+          
+          chrome.tabs.sendMessage(sender.tab.id, {
+            type: "RESULT",
+            text: rewrittenText
+          });
+        })
+        .catch(error => {
+          chrome.tabs.sendMessage(sender.tab.id, {
+            type: "ERROR",
+            message: `API Error: ${error.message}`
+          });
+        });
     });
   }
 });
 
-async function callDeepSeekAPI(text) {
-  // IMPORTANT: This should call your serverless function, not directly call DeepSeek API
-  // Replace this URL with your actual serverless function endpoint
+async function callDeepSeekAPI(text, style, prompt) {
   const API_URL = 'https://content-craft-phi.vercel.app/api/rewrite';
   
   try {
@@ -70,7 +76,11 @@ async function callDeepSeekAPI(text) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text: text })
+      body: JSON.stringify({ 
+        text: text,
+        style: style,
+        prompt: prompt
+      })
     });
     
     if (!response.ok) {
