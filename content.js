@@ -62,16 +62,17 @@ function showHoverButton() {
   hoverButton.innerHTML = '✨ AI Rewrite';
   hoverButton.style.cssText = `
     position: fixed;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    z-index: 999998;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    user-select: none;
+    background: #ff4444 !important; /* Bright red for visibility */
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    z-index: 2147483647 !important; /* Maximum z-index */
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
+    user-select: none !important;
+    border: 2px solid white !important;
   `;
   
   hoverButton.addEventListener('mousedown', function(e) {
@@ -123,6 +124,23 @@ function showHoverButton() {
   hoverButton.style.visibility = 'visible';
   
   console.log('Hover button created and positioned');
+  
+  // Debug: Add a temporary visible indicator
+  const debugIndicator = document.createElement('div');
+  debugIndicator.textContent = '🔴 BUTTON HERE';
+  debugIndicator.style.position = 'fixed';
+  debugIndicator.style.top = (topPos - 25) + 'px';
+  debugIndicator.style.left = leftPos + 'px';
+  debugIndicator.style.background = 'yellow';
+  debugIndicator.style.color = 'black';
+  debugIndicator.style.padding = '2px 5px';
+  debugIndicator.style.zIndex = '2147483646';
+  debugIndicator.style.fontSize = '10px';
+  document.body.appendChild(debugIndicator);
+  
+  setTimeout(() => {
+    debugIndicator.remove();
+  }, 3000);
 }
 
 function removeHoverButton() {
