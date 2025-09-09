@@ -1,5 +1,8 @@
+// This is the new, corrected version of content.js
+// It fixes the issue where the floating window does not appear on button click.
+
 let hoverButton = null;
-let selectedText = '';
+// Removed the global 'selectedText' variable to prevent scoping issues.
 
 console.log('ContentCraft extension loaded successfully');
 
@@ -29,13 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('mouseup', function(e) {
   console.log('Mouseup event detected');
   const selection = window.getSelection();
-  selectedText = selection.toString().trim();
+  const selectedText = selection.toString().trim();
   
   console.log('Selection text:', selectedText, 'Length:', selectedText.length);
   
   if (selectedText.length > 0 && !selection.isCollapsed) {
     console.log('Showing hover button');
-    showHoverButton();
+    // Pass the selected text directly to the function
+    showHoverButton(selectedText);
   } else {
     console.log('Removing hover button - no selection');
     removeHoverButton();
@@ -54,7 +58,8 @@ document.addEventListener('mousedown', function(e) {
   }
 });
 
-function showHoverButton() {
+// Now accepts selectedText as an argument
+function showHoverButton(text) {
   console.log('showHoverButton called');
   removeHoverButton();
   
@@ -81,15 +86,16 @@ function showHoverButton() {
     e.stopPropagation();
   });
   
-hoverButton.addEventListener('click', function(e) {
-  console.log('Hover button clicked - event triggered');
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-  console.log('Selected text for floating window:', selectedText);
-  showFloatingWindow(selectedText); 
-  return false;
-});
+  // Use the 'text' argument instead of trying to get selection again
+  hoverButton.addEventListener('click', function(e) {
+    console.log('Hover button clicked - event triggered');
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    console.log('Selected text for floating window:', text);
+    showFloatingWindow(text);
+    return false;
+  });
   
   document.body.appendChild(hoverButton);
   
@@ -161,6 +167,10 @@ function removeHoverButton() {
   }
 }
 
+// Global variable for floating window
+let floatingWindow = null;
+let originalText = '';
+
 function showFloatingWindow(text) {
   console.log('showFloatingWindow called with text:', text);
   
@@ -176,7 +186,8 @@ function showFloatingWindow(text) {
     existingWindow.remove();
   }
   
-  selectedText = text;
+  // Store the original text to use later
+  originalText = text;
   
   // Get selection position
   const selection = window.getSelection();
@@ -186,7 +197,7 @@ function showFloatingWindow(text) {
   const rect = range.getBoundingClientRect();
   
   // Create floating window
-  const floatingWindow = document.createElement('div');
+  floatingWindow = document.createElement('div');
   floatingWindow.className = 'ai-rewrite-floating-window';
   floatingWindow.style.cssText = `
     position: fixed;
@@ -312,7 +323,7 @@ function showFloatingWindow(text) {
     const customPrompt = promptInput.value.trim();
     
     if (customPrompt) {
-      processTextWithCustomPrompt(selectedText, customPrompt);
+      processTextWithCustomPrompt(originalText, customPrompt);
       floatingWindow.remove();
       removeHoverButton();
     } else {
@@ -354,7 +365,7 @@ chrome.runtime.onMessage.addListener((request) => {
       chrome.runtime.sendMessage({
         type: "SHOW_RESULT_IN_POPUP",
         text: request.text,
-        originalText: window.getSelection().toString().trim()
+        originalText: originalText
       });
       
       const success = replaceSelectedText(request.text);
