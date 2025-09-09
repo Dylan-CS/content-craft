@@ -40,9 +40,11 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
+    console.log('Hover button clicked - event triggered');
     e.preventDefault();
     e.stopPropagation();
     const selectedText = window.getSelection().toString().trim();
+    console.log('Selected text:', selectedText);
     showFloatingWindow(selectedText);
     return false;
   });
@@ -69,9 +71,12 @@ function removeHoverButton() {
 }
 
 function showFloatingWindow(text) {
+  console.log('showFloatingWindow called with text:', text);
+  
   // Remove any existing floating window
   const existingWindow = document.querySelector('.ai-rewrite-floating-window');
   if (existingWindow) {
+    console.log('Removed existing floating window');
     existingWindow.remove();
   }
   
@@ -129,6 +134,7 @@ function showFloatingWindow(text) {
   `;
   
   document.body.appendChild(floatingWindow);
+  console.log('Floating window appended to body');
   
   // Position near selection (fixed positioning)
   const windowWidth = 350;
