@@ -86,7 +86,7 @@ function showHoverButton() {
     e.stopPropagation();
     e.stopImmediatePropagation();
     const selectedText = window.getSelection().toString().trim();
-    console.log('Selected text:', selectedText);
+    console.log('Selected text for floating window:', selectedText);
     showFloatingWindow(selectedText);
     return false;
   });
@@ -153,6 +153,11 @@ function removeHoverButton() {
 function showFloatingWindow(text) {
   console.log('showFloatingWindow called with text:', text);
   
+  if (!text || text.length === 0) {
+    console.log('No text provided to showFloatingWindow');
+    return;
+  }
+  
   // Remove any existing floating window
   const existingWindow = document.querySelector('.ai-rewrite-floating-window');
   if (existingWindow) {
@@ -215,6 +220,13 @@ function showFloatingWindow(text) {
   
   document.body.appendChild(floatingWindow);
   console.log('Floating window appended to body');
+  
+  // Debug: Check if floating window is actually in DOM
+  const checkWindow = document.querySelector('.ai-rewrite-floating-window');
+  console.log('Floating window in DOM:', !!checkWindow);
+  if (checkWindow) {
+    console.log('Window dimensions:', checkWindow.offsetWidth, 'x', checkWindow.offsetHeight);
+  }
   
   // Position near selection (fixed positioning)
   const windowWidth = 350;
