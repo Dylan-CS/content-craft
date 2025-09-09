@@ -3,8 +3,11 @@ let selectedText = '';
 
 // Create hover button when text is selected
 document.addEventListener('mouseup', function(e) {
+  console.log('mouseup event detected');
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
+  
+  console.log('Selected text:', selectedText, 'Collapsed:', selection.isCollapsed);
   
   if (selectedText.length > 0 && !selection.isCollapsed) {
     showHoverButton(e);
@@ -21,6 +24,7 @@ document.addEventListener('mousedown', function(e) {
 });
 
 function showHoverButton(event) {
+  console.log('showHoverButton called');
   removeHoverButton();
   
   hoverButton = document.createElement('div');
@@ -40,16 +44,16 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
+    console.log('Hover button clicked');
     e.stopPropagation();
     showStyleSelection(event);
   });
   
   document.body.appendChild(hoverButton);
   
-  // Position near the selection
-  const rect = event.target.getBoundingClientRect();
-  hoverButton.style.top = (rect.top - 35) + 'px';
-  hoverButton.style.left = (rect.left + rect.width / 2 - 40) + 'px';
+  // Position near the mouse cursor
+  hoverButton.style.top = (event.clientY - 35) + 'px';
+  hoverButton.style.left = (event.clientX - 40) + 'px';
 }
 
 function removeHoverButton() {
@@ -60,6 +64,7 @@ function removeHoverButton() {
 }
 
 function showStyleSelection(event) {
+  console.log('showStyleSelection called');
   const selection = window.getSelection();
   selectedText = selection.toString().trim();
   
@@ -95,7 +100,7 @@ function showStyleSelection(event) {
   // Add event listeners to style buttons
   const buttons = popup.querySelectorAll('button[data-style]');
   buttons.forEach(button => {
-    button.addEventListener('click', function(e) {
+    button.addEventListener('click', function() {
       const style = this.getAttribute('data-style');
       processTextWithStyle(selectedText, style);
       popup.remove();
@@ -105,9 +110,9 @@ function showStyleSelection(event) {
   
   // Add event listener for custom prompt button
   const customPromptBtn = popup.querySelector('#custom-prompt-btn');
-  customPromptBtn.addEventListener('click', function(e) {
+  customPromptBtn.addEventListener('click', function() {
     popup.remove();
-    showPromptInputModal(selectedText, event);
+    showPromptInputModal(selectedText);
   });
   
   // Close when clicking outside
@@ -122,7 +127,7 @@ function showStyleSelection(event) {
   document.body.appendChild(popup);
 }
 
-function showPromptInputModal(text, event) {
+function showPromptInputModal(text) {
   // Create modal for custom prompt input
   const modal = document.createElement('div');
   modal.innerHTML = `
@@ -252,7 +257,7 @@ function getDefaultPromptForStyle(style) {
   return stylePrompts[style] || stylePrompts.workplace;
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, sendResponse) => {
   switch (request.type) {
     case "GET_SELECTED_TEXT":
       const selection = window.getSelection();
