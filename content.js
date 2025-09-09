@@ -99,6 +99,8 @@ function removeHoverButton() {
 
 function showPromptInputModal(text) {
   console.log('showPromptInputModal called with text:', text);
+  // Save the selected text globally since selection might be lost when modal shows
+  selectedText = text;
   // Create modal for custom prompt input
   const modal = document.createElement('div');
   modal.innerHTML = `
@@ -177,7 +179,7 @@ function showPromptInputModal(text) {
     const customPrompt = promptInput.value.trim();
     
     if (customPrompt) {
-      processTextWithCustomPrompt(text, customPrompt);
+      processTextWithCustomPrompt(selectedText, customPrompt);
       modal.remove();
       removeHoverButton();
     } else {
