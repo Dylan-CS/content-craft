@@ -73,6 +73,7 @@ function showHoverButton() {
     box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
     user-select: none !important;
     border: 2px solid white !important;
+    pointer-events: auto !important;
   `;
   
   hoverButton.addEventListener('mousedown', function(e) {
@@ -127,7 +128,7 @@ function showHoverButton() {
   
   // Debug: Add a temporary visible indicator
   const debugIndicator = document.createElement('div');
-  debugIndicator.textContent = '🔴 BUTTON HERE';
+  debugIndicator.textContent = '🔴 BUTTON HERE - CLICK ME';
   debugIndicator.style.position = 'fixed';
   debugIndicator.style.top = (topPos - 25) + 'px';
   debugIndicator.style.left = leftPos + 'px';
@@ -136,11 +137,16 @@ function showHoverButton() {
   debugIndicator.style.padding = '2px 5px';
   debugIndicator.style.zIndex = '2147483646';
   debugIndicator.style.fontSize = '10px';
+  debugIndicator.style.cursor = 'pointer';
+  debugIndicator.addEventListener('click', function() {
+    console.log('Debug indicator clicked - testing if clicks work');
+    hoverButton.click(); // Programmatically click the button
+  });
   document.body.appendChild(debugIndicator);
   
   setTimeout(() => {
     debugIndicator.remove();
-  }, 3000);
+  }, 5000);
 }
 
 function removeHoverButton() {
