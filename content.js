@@ -259,8 +259,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
       
     case "RESULT":
+      // Send result to popup if it's open
+      chrome.runtime.sendMessage({
+        type: "SHOW_RESULT_IN_POPUP",
+        text: request.text,
+        originalText: window.getSelection().toString().trim()
+      });
+      
+      // Also try to replace text on page
       const success = replaceSelectedText(request.text);
-      // Send response back to background script
       if (!success) {
         chrome.runtime.sendMessage({
           type: "REPLACEMENT_FAILED"

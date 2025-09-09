@@ -25,14 +25,14 @@ export default async function handler(req, res) {
     
     // Style-specific rewriting simulation
     const styleTransformations = {
-      professional: (t) => `Professionally refined: ${t} (enhanced for business communication)`,
+      workplace: (t) => `Professionally refined: ${t} (enhanced for business communication)`,
       casual: (t) => `Casual version: ${t} (more friendly and conversational)`,
       academic: (t) => `Academic revision: ${t} (formal and scholarly tone)`,
       creative: (t) => `Creative rewrite: ${t} (more engaging and imaginative)`,
       concise: (t) => `Concise version: ${t} (clear and to the point)`
     };
     
-    const transform = styleTransformations[style] || styleTransformations.professional;
+    const transform = styleTransformations[style] || styleTransformations.workplace;
     const rewrittenText = transform(text);
     
     res.status(200).json({ 
