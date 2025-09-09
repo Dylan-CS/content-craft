@@ -90,23 +90,27 @@ function showPromptInputModal(text) {
   // Create floating window instead of modal
   const floatingWindow = document.createElement('div');
   floatingWindow.innerHTML = `
-    <div style="position: fixed; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 350px; max-width: 90vw; z-index: 999999; border: 1px solid #e0e0e0;">
+    <div style="position: fixed; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 350px; max-width: 90vw; z-index: 2147483647; border: 1px solid #e0e0e0; display: block !important;">
       <div style="font-weight: 600; margin-bottom: 12px; color: #2c3e50; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
         <span>AI Rewrite</span>
         <button id="close-float" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #95a5a6;">×</button>
       </div>
       
       <div style="margin-bottom: 12px;">
-        <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Selected Text:</div>
-        <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;">
+        <label for="selected-text-display" style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px; display: block;">Selected Text:</label>
+        <div 
+          id="selected-text-display"
+          style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;"
+        >
           ${text.length > 150 ? text.substring(0, 150) + '...' : text}
         </div>
       </div>
       
       <div style="margin-bottom: 12px;">
-        <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Custom Prompt:</div>
+        <label for="custom-prompt-input" style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px; display: block;">Custom Prompt:</label>
         <textarea 
           id="custom-prompt-input" 
+          name="custom-prompt"
           placeholder="Enter your custom instructions..."
           style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: inherit; resize: vertical; box-sizing: border-box;"
         ></textarea>
@@ -155,8 +159,12 @@ function showPromptInputModal(text) {
     leftPos = 10;
   }
   
-  floatingWindow.querySelector('div:first-child').style.top = topPos + 'px';
-  floatingWindow.querySelector('div:first-child').style.left = leftPos + 'px';
+  const floatingDiv = floatingWindow.querySelector('div:first-child');
+  floatingDiv.style.top = topPos + 'px';
+  floatingDiv.style.left = leftPos + 'px';
+  
+  console.log('Floating window positioned at:', topPos, leftPos);
+  console.log('Floating window element:', floatingDiv);
   
   // Focus on textarea
   setTimeout(() => {
