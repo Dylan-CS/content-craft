@@ -96,12 +96,33 @@ function showHoverButton() {
   const range = window.getSelection().getRangeAt(0);
   const rect = range.getBoundingClientRect();
   
+  console.log('Selection rect:', rect);
+  
   const buttonWidth = 100;
-  const topPos = rect.top - 35;
-  const leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2);
+  const buttonHeight = 30;
+  let topPos = rect.top - 35;
+  let leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2);
+  
+  // Ensure button stays within viewport
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  if (topPos < 10) topPos = 10;
+  if (topPos + buttonHeight > viewportHeight - 10) topPos = viewportHeight - buttonHeight - 10;
+  if (leftPos < 10) leftPos = 10;
+  if (leftPos + buttonWidth > viewportWidth - 10) leftPos = viewportWidth - buttonWidth - 10;
+  
+  console.log('Button position - Top:', topPos, 'Left:', leftPos);
+  console.log('Viewport - Width:', viewportWidth, 'Height:', viewportHeight);
   
   hoverButton.style.top = topPos + 'px';
   hoverButton.style.left = leftPos + 'px';
+  
+  // Make sure it's visible
+  hoverButton.style.display = 'block';
+  hoverButton.style.visibility = 'visible';
+  
+  console.log('Hover button created and positioned');
 }
 
 function removeHoverButton() {
