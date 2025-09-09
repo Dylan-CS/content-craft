@@ -66,15 +66,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
   }
   
-  if (request.type === "SHOW_RESULT_IN_POPUP") {
-    // Send result to popup window if it's open
-    chrome.runtime.sendMessage({
-      type: "POPUP_RESULT",
-      originalText: request.originalText,
-      rewrittenText: request.text
-    });
-  }
-  
   if (request.type === "PROCESS_WITH_CUSTOM_PROMPT") {
     const { text, prompt } = request;
     

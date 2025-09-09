@@ -3,11 +3,8 @@ let selectedText = '';
 
 // Create hover button when text is selected
 document.addEventListener('mouseup', function(e) {
-  console.log('mouseup event detected');
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
-  
-  console.log('Selected text:', selectedText, 'Collapsed:', selection.isCollapsed);
   
   if (selectedText.length > 0 && !selection.isCollapsed) {
     showHoverButton(e);
@@ -24,7 +21,6 @@ document.addEventListener('mousedown', function(e) {
 });
 
 function showHoverButton(event) {
-  console.log('showHoverButton called');
   removeHoverButton();
   
   hoverButton = document.createElement('div');
@@ -44,7 +40,6 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
-    console.log('Hover button clicked');
     e.stopPropagation();
     showStyleSelection(event);
   });
@@ -64,7 +59,6 @@ function removeHoverButton() {
 }
 
 function showStyleSelection(event) {
-  console.log('showStyleSelection called');
   const selection = window.getSelection();
   selectedText = selection.toString().trim();
   
@@ -257,14 +251,8 @@ function getDefaultPromptForStyle(style) {
   return stylePrompts[style] || stylePrompts.workplace;
 }
 
-chrome.runtime.onMessage.addListener((request, sendResponse) => {
+chrome.runtime.onMessage.addListener((request) => {
   switch (request.type) {
-    case "GET_SELECTED_TEXT":
-      const selection = window.getSelection();
-      const selectedText = selection.toString().trim();
-      sendResponse({ selectedText: selectedText });
-      break;
-      
     case "PROCESSING":
       showNotification(request.message);
       break;
