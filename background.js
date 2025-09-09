@@ -96,25 +96,7 @@ async function callDeepSeekAPI(text, style, prompt) {
     }
     
   } catch (error) {
-    console.error('DeepSeek API Error:', error);
     throw error;
   }
 }
 
-function simulateAIProcessing(text, tabId) {
-  // For now, using simulation. Replace with callDeepSeekAPI(text) when ready
-  setTimeout(() => {
-    const rewrittenText = `AI Rewritten: ${text} (Simulated - add DeepSeek API)`;
-    
-    // Count usage now since AI processing was successful
-    chrome.storage.local.get(['usageCount'], (result) => {
-      const newCount = (result.usageCount || 0) + 1;
-      chrome.storage.local.set({ usageCount: newCount });
-    });
-    
-    chrome.tabs.sendMessage(tabId, {
-      type: "RESULT",
-      text: rewrittenText
-    });
-  }, 1000);
-}

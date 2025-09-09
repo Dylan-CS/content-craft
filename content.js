@@ -1,8 +1,6 @@
 let hoverButton = null;
 let selectedText = '';
 
-console.log('ContentCraft content script loaded successfully');
-
 // Create hover button when text is selected
 document.addEventListener('mouseup', function(e) {
   const selection = window.getSelection();
@@ -17,9 +15,7 @@ document.addEventListener('mouseup', function(e) {
 
 // Hide button when clicking elsewhere
 document.addEventListener('mousedown', function(e) {
-  console.log('Global mousedown event, target:', e.target);
   if (hoverButton && !hoverButton.contains(e.target)) {
-    console.log('Removing hover button because click was outside');
     removeHoverButton();
   }
 });
@@ -44,27 +40,12 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
-    console.log('Hover button click event triggered');
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     const selectedText = window.getSelection().toString().trim();
-    console.log('Selected text:', selectedText);
     showPromptInputModal(selectedText);
     return false;
-  });
-  
-  // Also add mousedown listener to debug
-  hoverButton.addEventListener('mousedown', function(e) {
-    console.log('Hover button mousedown event');
-    e.stopPropagation();
-    // Don't prevent default to allow click event to trigger
-  });
-  
-  // Add mouseup listener to debug
-  hoverButton.addEventListener('mouseup', function(e) {
-    console.log('Hover button mouseup event');
-    e.stopPropagation();
   });
   
   document.body.appendChild(hoverButton);
@@ -73,16 +54,11 @@ function showHoverButton(event) {
   const range = window.getSelection().getRangeAt(0);
   const rect = range.getBoundingClientRect();
   
-  console.log('Selection rect:', rect);
-  console.log('Scroll position:', window.scrollX, window.scrollY);
-  
   // Position button just above the selection, centered horizontally
   // Use fixed positioning to avoid scroll offset issues
   const buttonWidth = 100; // Approximate button width
   const topPos = rect.top - 35; // Relative to viewport
   const leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2); // Relative to viewport
-  
-  console.log('Button position:', topPos, leftPos);
   
   hoverButton.style.position = 'fixed';
   hoverButton.style.top = topPos + 'px';
@@ -98,7 +74,6 @@ function removeHoverButton() {
 
 
 function showPromptInputModal(text) {
-  console.log('showPromptInputModal called with text:', text);
   // Save the selected text globally since selection might be lost when modal shows
   selectedText = text;
   // Create modal for custom prompt input
@@ -143,15 +118,12 @@ function showPromptInputModal(text) {
   `;
   
   document.body.appendChild(modal);
-  console.log('Modal appended to DOM');
   
   // Focus on textarea
   setTimeout(() => {
     const textarea = modal.querySelector('#custom-prompt-input');
-    console.log('Textarea found:', textarea);
     if (textarea) {
       textarea.focus();
-      console.log('Textarea focused');
     }
   }, 100);
   
@@ -202,20 +174,6 @@ function showPromptInputModal(text) {
   document.addEventListener('mousedown', closeModal);
 }
 
-// Test function to manually trigger modal
-globalThis.testShowModal = function() {
-  console.log('Manual test: showing modal');
-  showPromptInputModal('Test text for manual testing');
-};
-
-// Add test button to page for debugging
-const testBtn = document.createElement('button');
-testBtn.textContent = 'Test Modal';
-testBtn.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 999999; padding: 10px; background: red; color: white;';
-testBtn.onclick = function() {
-  testShowModal();
-};
-document.body.appendChild(testBtn);
 
 function processTextWithCustomPrompt(text, customPrompt) {
   // Send to background for processing with custom prompt
