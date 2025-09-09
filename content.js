@@ -18,7 +18,12 @@ document.addEventListener('mouseup', function(e) {
 // Hide button when clicking elsewhere
 document.addEventListener('mousedown', function(e) {
   if (hoverButton && !hoverButton.contains(e.target)) {
-    removeHoverButton();
+    // Use setTimeout to allow click event to process first
+    setTimeout(() => {
+      if (hoverButton && !hoverButton.contains(e.target)) {
+        removeHoverButton();
+      }
+    }, 100);
   }
 });
 
@@ -41,10 +46,16 @@ function showHoverButton() {
     user-select: none;
   `;
   
+  hoverButton.addEventListener('mousedown', function(e) {
+    // Prevent the document mousedown from removing this button
+    e.stopPropagation();
+  });
+  
   hoverButton.addEventListener('click', function(e) {
     console.log('Hover button clicked - event triggered');
     e.preventDefault();
     e.stopPropagation();
+    e.stopImmediatePropagation();
     const selectedText = window.getSelection().toString().trim();
     console.log('Selected text:', selectedText);
     showFloatingWindow(selectedText);
