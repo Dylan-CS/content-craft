@@ -44,13 +44,13 @@ document.addEventListener('mouseup', function(e) {
 
 // Hide button when clicking elsewhere
 document.addEventListener('mousedown', function(e) {
-  if (hoverButton && !hoverButton.contains(e.target)) {
-    // Use setTimeout to allow click event to process first
+  if (hoverButton && !hoverButton.contains(e.target) && e.target.id !== 'close-float') {
+    // Use longer timeout to ensure click events can process
     setTimeout(() => {
       if (hoverButton && !hoverButton.contains(e.target)) {
         removeHoverButton();
       }
-    }, 100);
+    }, 300);
   }
 });
 
@@ -140,7 +140,13 @@ function showHoverButton() {
   debugIndicator.style.cursor = 'pointer';
   debugIndicator.addEventListener('click', function() {
     console.log('Debug indicator clicked - testing if clicks work');
-    hoverButton.click(); // Programmatically click the button
+    // Store reference to the current button
+    const currentButton = hoverButton;
+    if (currentButton) {
+      currentButton.click(); // Programmatically click the button
+    } else {
+      console.log('Hover button is null - it was removed');
+    }
   });
   document.body.appendChild(debugIndicator);
   
