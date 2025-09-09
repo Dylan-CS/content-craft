@@ -270,6 +270,10 @@ function processTextWithCustomPrompt(text, customPrompt) {
 
 chrome.runtime.onMessage.addListener((request) => {
   switch (request.type) {
+    case "SHOW_STYLE_SELECTION":
+      showFloatingWindow(request.text);
+      break;
+      
     case "PROCESSING":
       showNotification(request.message);
       break;
