@@ -100,24 +100,17 @@ function showFloatingWindow(text) {
     return;
   }
   
-  // Remove any existing floating window
+  // 移除任何已存在的浮动窗口
   const existingWindow = document.querySelector('.ai-rewrite-floating-window');
   if (existingWindow) {
     console.log('Removed existing floating window');
     existingWindow.remove();
   }
   
-  // Store the original text to use later
+  // 存储原始文本供后续使用
   originalText = text;
   
-  // Get selection position
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
-  
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-  
-  // Create floating window
+  // 创建浮动窗口
   floatingWindow = document.createElement('div');
   floatingWindow.className = 'ai-rewrite-floating-window';
   floatingWindow.style.cssText = `
@@ -137,24 +130,16 @@ function showFloatingWindow(text) {
       <span>AI Rewrite</span>
       <button id="close-float" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #95a5a6;">×</button>
     </div>
-    
     <div style="margin-bottom: 12px;">
       <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Selected Text:</div>
       <div id="selected-text-display" style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;">
         ${text.length > 150 ? text.substring(0, 150) + '...' : text}
       </div>
     </div>
-    
     <div style="margin-bottom: 12px;">
       <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Custom Prompt:</div>
-      <textarea 
-        id="custom-prompt-input" 
-        name="custom-prompt"
-        placeholder="Enter your custom instructions..."
-        style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: inherit; resize: vertical; box-sizing: border-box;"
-      ></textarea>
+      <textarea id="custom-prompt-input" name="custom-prompt" placeholder="Enter your custom instructions..." style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
     </div>
-    
     <div style="margin-bottom: 12px;">
       <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Quick Templates:</div>
       <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
@@ -164,7 +149,6 @@ function showFloatingWindow(text) {
         <button style="padding: 4px 8px; background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 3px; cursor: pointer; font-size: 10px; color: #f57c00;" data-prompt="Make this more creative and engaging">Creative</button>
       </div>
     </div>
-    
     <div style="display: flex; gap: 6px; justify-content: flex-end;">
       <button id="cancel-prompt" style="padding: 8px 12px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Cancel</button>
       <button id="submit-prompt" style="padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">Rewrite</button>
@@ -172,31 +156,45 @@ function showFloatingWindow(text) {
   `;
   
   document.body.appendChild(floatingWindow);
+
+  // --- 开始：新的窗口定位逻辑 ---
+  const selection = window.getSelection();
+  let topPos, leftPos;
   
-  // Position near selection (fixed positioning)
   const windowWidth = 350;
-  const windowHeight = floatingWindow.offsetHeight;
+  const windowHeight = floatingWindow.offsetHeight || 280; // 使用实际高度或备用值
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  
-  let topPos = rect.bottom + 10;
-  let leftPos = rect.left;
-  
-  // Adjust position if it would go off screen
-  if (topPos + windowHeight > viewportHeight) {
-    topPos = rect.top - windowHeight - 10;
+
+  if (selection && selection.rangeCount > 0 && selection.toString().trim().length > 0) {
+    // 如果选区存在，则相对于它定位
+    const range = selection.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    topPos = rect.bottom + 10;
+    leftPos = rect.left;
+
+    // 如果窗口会超出屏幕，则调整位置
+    if (topPos + windowHeight > viewportHeight) {
+      topPos = rect.top - windowHeight - 10;
+    }
+    if (leftPos + windowWidth > viewportWidth) {
+      leftPos = viewportWidth - windowWidth - 10;
+    }
+  } else {
+    // 备用方案：将窗口定位在屏幕中央
+    topPos = (viewportHeight - windowHeight) / 2;
+    leftPos = (viewportWidth - windowWidth) / 2;
   }
-  if (leftPos + windowWidth > viewportWidth) {
-    leftPos = viewportWidth - windowWidth - 10;
-  }
-  if (leftPos < 10) {
-    leftPos = 10;
-  }
-  
+
+  // 最后的边界检查，防止窗口紧贴边缘
+  if (leftPos < 10) leftPos = 10;
+  if (topPos < 10) topPos = 10;
+
   floatingWindow.style.top = topPos + 'px';
   floatingWindow.style.left = leftPos + 'px';
+  // --- 结束：新的窗口定位逻辑 ---
   
-  // Focus on textarea
+  // 让输入框自动获得焦点
   setTimeout(() => {
     const textarea = floatingWindow.querySelector('#custom-prompt-input');
     if (textarea) {
@@ -204,7 +202,7 @@ function showFloatingWindow(text) {
     }
   }, 100);
   
-  // Add event listeners
+  // 添加事件监听器
   const templateButtons = floatingWindow.querySelectorAll('button[data-prompt]');
   templateButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -215,21 +213,21 @@ function showFloatingWindow(text) {
     });
   });
   
-  // Close button
+  // 关闭按钮
   const closeBtn = floatingWindow.querySelector('#close-float');
   closeBtn.addEventListener('click', function() {
     floatingWindow.remove();
     removeHoverButton();
   });
   
-  // Cancel button
+  // 取消按钮
   const cancelBtn = floatingWindow.querySelector('#cancel-prompt');
   cancelBtn.addEventListener('click', function() {
     floatingWindow.remove();
     removeHoverButton();
   });
   
-  // Submit button
+  // 提交按钮
   const submitBtn = floatingWindow.querySelector('#submit-prompt');
   submitBtn.addEventListener('click', function() {
     const promptInput = floatingWindow.querySelector('#custom-prompt-input');
@@ -247,9 +245,9 @@ function showFloatingWindow(text) {
     }
   });
   
-  // Close when clicking outside
+  // 点击外部区域关闭窗口
   const closeOnClickOutside = function(e) {
-    if (!floatingWindow.contains(e.target) && e.target !== hoverButton) {
+    if (floatingWindow && !floatingWindow.contains(e.target) && e.target !== hoverButton) {
       floatingWindow.remove();
       document.removeEventListener('mousedown', closeOnClickOutside);
     }
@@ -273,7 +271,7 @@ chrome.runtime.onMessage.addListener((request) => {
     case "SHOW_STYLE_SELECTION":
       showFloatingWindow(request.text);
       break;
-      
+
     case "PROCESSING":
       showNotification(request.message);
       break;
