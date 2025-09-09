@@ -65,6 +65,48 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
     });
   }
+  
+  if (request.type === "PROCESS_WITH_CUSTOM_PROMPT") {
+    const { text, prompt } = request;
+    
+    chrome.storage.local.get(['usageCount'], (result) => {
+      const usageCount = result.usageCount || 0;
+      
+      if (usageCount >= 10) {
+        chrome.tabs.sendMessage(sender.tab.id, {
+          type: "ERROR",
+          message: "Free usage limit reached. Please upgrade to Pro version"
+        });
+        return;
+      }
+
+      chrome.tabs.sendMessage(sender.tab.id, {
+        type: "PROCESSING",
+        message: "Processing..."
+      });
+
+      // Use actual API call with custom prompt (use 'custom' as style)
+      callDeepSeekAPI(text, 'custom', prompt)
+        .then(rewrittenText => {
+          // Count usage on success
+          chrome.storage.local.get(['usageCount'], (result) => {
+            const newCount = (result.usageCount || 0) + 1;
+            chrome.storage.local.set({ usageCount: newCount });
+          });
+          
+          chrome.tabs.sendMessage(sender.tab.id, {
+            type: "RESULT",
+            text: rewrittenText
+          });
+        })
+        .catch(error => {
+          chrome.tabs.sendMessage(sender.tab.id, {
+            type: "ERROR",
+            message: `API Error: ${error.message}`
+          });
+        });
+    });
+  }
 });
 
 async function callDeepSeekAPI(text, style, prompt) {

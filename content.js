@@ -65,13 +65,23 @@ function showStyleSelection(event) {
   
   if (selectedText.length === 0) return;
   
-  // Create style selection popup
+  // Create style selection popup with prompt input option
   const popup = document.createElement('div');
   popup.innerHTML = `
-    <div style="padding: 12px; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid #ddd;">
-      <div style="font-weight: 500; margin-bottom: 8px; color: #2c3e50;">Choose style:</div>
-      <button style="margin: 4px; padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;" data-style="workplace">🏢 Workplace</button>
-      <button style="margin: 4px; padding: 8px 12px; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;" data-style="casual">💬 Casual</button>
+    <div style="padding: 16px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border: 1px solid #e0e0e0; min-width: 280px;">
+      <div style="font-weight: 600; margin-bottom: 12px; color: #2c3e50; font-size: 14px;">Choose rewrite style:</div>
+      <div style="margin-bottom: 12px;">
+        <button style="margin: 4px; padding: 10px 14px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="workplace">🏢 Workplace (Professional)</button>
+        <button style="margin: 4px; padding: 10px 14px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="casual">💬 Casual (Friendly)</button>
+        <button style="margin: 4px; padding: 10px 14px; background: #9b59b6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="academic">🎓 Academic (Formal)</button>
+        <button style="margin: 4px; padding: 10px 14px; background: #f39c12; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="creative">🎨 Creative (Engaging)</button>
+        <button style="margin: 4px; padding: 10px 14px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="concise">✂️ Concise (Clear)</button>
+      </div>
+      <div style="border-top: 1px solid #eee; padding-top: 12px; margin-top: 8px;">
+        <button id="custom-prompt-btn" style="margin: 4px; padding: 10px 14px; background: #7f8c8d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%;">
+          💡 Custom Prompt
+        </button>
+      </div>
     </div>
   `;
   
@@ -79,11 +89,11 @@ function showStyleSelection(event) {
     position: absolute;
     z-index: 10001;
     top: ${event.clientY + 10}px;
-    left: ${event.clientX - 80}px;
+    left: ${event.clientX - 140}px;
   `;
   
-  // Add event listeners to buttons
-  const buttons = popup.querySelectorAll('button');
+  // Add event listeners to style buttons
+  const buttons = popup.querySelectorAll('button[data-style]');
   buttons.forEach(button => {
     button.addEventListener('click', function(e) {
       const style = this.getAttribute('data-style');
@@ -91,6 +101,13 @@ function showStyleSelection(event) {
       popup.remove();
       removeHoverButton();
     });
+  });
+  
+  // Add event listener for custom prompt button
+  const customPromptBtn = popup.querySelector('#custom-prompt-btn');
+  customPromptBtn.addEventListener('click', function(e) {
+    popup.remove();
+    showPromptInputModal(selectedText, event);
   });
   
   // Close when clicking outside
@@ -105,10 +122,105 @@ function showStyleSelection(event) {
   document.body.appendChild(popup);
 }
 
+function showPromptInputModal(text, event) {
+  // Create modal for custom prompt input
+  const modal = document.createElement('div');
+  modal.innerHTML = `
+    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10002; display: flex; align-items: center; justify-content: center;">
+      <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 400px; max-width: 90vw;">
+        <div style="font-weight: 600; margin-bottom: 16px; color: #2c3e50; font-size: 16px;">Custom AI Rewrite</div>
+        
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight: 500; margin-bottom: 8px; color: #34495e; font-size: 13px;">Selected Text:</div>
+          <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; font-size: 13px; color: #495057; max-height: 80px; overflow-y: auto;">
+            ${text.length > 200 ? text.substring(0, 200) + '...' : text}
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight: 500; margin-bottom: 8px; color: #34495e; font-size: 13px;">Custom Prompt:</div>
+          <textarea 
+            id="custom-prompt-input" 
+            placeholder="Enter your custom instructions for the AI..."
+            style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; box-sizing: border-box;"
+          ></textarea>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight: 500; margin-bottom: 8px; color: #34495e; font-size: 13px;">Quick Templates:</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+            <button style="padding: 6px 10px; background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 4px; cursor: pointer; font-size: 11px; color: #1976d2;" data-prompt="Make this more professional and business-appropriate">Professional</button>
+            <button style="padding: 6px 10px; background: #f3e5f5; border: 1px solid #e1bee7; border-radius: 4px; cursor: pointer; font-size: 11px; color: #7b1fa2;" data-prompt="Make this more casual and friendly">Casual</button>
+            <button style="padding: 6px 10px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 4px; cursor: pointer; font-size: 11px; color: #388e3c;" data-prompt="Make this more concise and clear">Concise</button>
+            <button style="padding: 6px 10px; background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 4px; cursor: pointer; font-size: 11px; color: #f57c00;" data-prompt="Make this more creative and engaging">Creative</button>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+          <button id="cancel-prompt" style="padding: 10px 16px; background: #95a5a6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">Cancel</button>
+          <button id="submit-prompt" style="padding: 10px 16px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;">Rewrite</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Focus on textarea
+  setTimeout(() => {
+    const textarea = modal.querySelector('#custom-prompt-input');
+    if (textarea) textarea.focus();
+  }, 100);
+  
+  // Add event listeners for template buttons
+  const templateButtons = modal.querySelectorAll('button[data-prompt]');
+  templateButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const prompt = this.getAttribute('data-prompt');
+      const textarea = modal.querySelector('#custom-prompt-input');
+      textarea.value = prompt;
+      textarea.focus();
+    });
+  });
+  
+  // Cancel button
+  const cancelBtn = modal.querySelector('#cancel-prompt');
+  cancelBtn.addEventListener('click', function() {
+    modal.remove();
+  });
+  
+  // Submit button
+  const submitBtn = modal.querySelector('#submit-prompt');
+  submitBtn.addEventListener('click', function() {
+    const promptInput = modal.querySelector('#custom-prompt-input');
+    const customPrompt = promptInput.value.trim();
+    
+    if (customPrompt) {
+      processTextWithCustomPrompt(text, customPrompt);
+      modal.remove();
+      removeHoverButton();
+    } else {
+      // Show validation error
+      promptInput.style.borderColor = '#e74c3c';
+      setTimeout(() => {
+        promptInput.style.borderColor = '#ddd';
+      }, 1000);
+    }
+  });
+  
+  // Close modal when clicking outside
+  const closeModal = function(e) {
+    if (e.target === modal.querySelector('div:first-child')) {
+      modal.remove();
+      document.removeEventListener('mousedown', closeModal);
+    }
+  };
+  
+  document.addEventListener('mousedown', closeModal);
+}
+
 function processTextWithStyle(text, style) {
-  const prompt = style === 'workplace' 
-    ? 'Rewrite this text to be more professional, clear, and appropriate for workplace communication.'
-    : 'Rewrite this text to be more casual, friendly, and suitable for informal conversations.';
+  const prompt = getDefaultPromptForStyle(style);
   
   // Send to background for processing
   chrome.runtime.sendMessage({
@@ -117,6 +229,27 @@ function processTextWithStyle(text, style) {
     style: style,
     prompt: prompt
   });
+}
+
+function processTextWithCustomPrompt(text, customPrompt) {
+  // Send to background for processing with custom prompt
+  chrome.runtime.sendMessage({
+    type: "PROCESS_WITH_CUSTOM_PROMPT",
+    text: text,
+    prompt: customPrompt
+  });
+}
+
+function getDefaultPromptForStyle(style) {
+  const stylePrompts = {
+    workplace: 'Rewrite this text to be more professional, clear, and appropriate for workplace communication.',
+    casual: 'Rewrite this text to be more casual, friendly, and suitable for informal conversations.',
+    academic: 'Rewrite this text in a formal, scholarly academic style with proper terminology and structure.',
+    creative: 'Rewrite this text to be more creative, engaging, and imaginative while maintaining the core meaning.',
+    concise: 'Rewrite this text to be more concise, clear, and to the point while preserving the essential information.'
+  };
+  
+  return stylePrompts[style] || stylePrompts.workplace;
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
