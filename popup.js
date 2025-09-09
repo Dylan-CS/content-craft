@@ -37,6 +37,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
   updateUsageDisplay();
 
+  // Add quick rewrite functionality
+  const quickPromptInput = document.getElementById('quickPromptInput');
+  const quickRewriteBtn = document.getElementById('quickRewriteBtn');
+  
+  quickRewriteBtn.addEventListener('click', function() {
+    const prompt = quickPromptInput.value.trim();
+    
+    if (!prompt) {
+      alert('Please enter some text or instructions');
+      return;
+    }
+    
+    // Get the currently selected text from the active tab
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          type: "GET_SELECTED_TEXT"
+        }, function(response) {
+          if (response && response.selectedText) {
+            // Process with custom prompt
+            chrome.runtime.sendMessage({
+              type: "PROCESS_WITH_CUSTOM_PROMPT",
+              text: response.selectedText,
+              prompt: prompt
+            });
+            
+            // Show processing message
+            showNotification('Processing your text...');
+            
+          } else {
+            alert('Please select some text on the page first');
+          }
+        });
+      }
+    });
+  });
+
   chrome.storage.onChanged.addListener(function(changes, namespace) {
     if (namespace === 'local' && changes.usageCount) {
       updateUsageDisplay();
@@ -44,12 +81,38 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Listen for result messages
-  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  chrome.runtime.onMessage.addListener(function(request) {
     if (request.type === "POPUP_RESULT") {
       showResultInPopup(request.originalText, request.rewrittenText);
     }
   });
 });
+
+function showNotification(message, isError = false) {
+  // Create a simple notification
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    background: ${isError ? '#ff4757' : '#2ed573'};
+    color: white;
+    border-radius: 6px;
+    z-index: 10000;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  `;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.parentNode.removeChild(notification);
+    }
+  }, 3000);
+}
 
 function showResultInPopup(originalText, rewrittenText) {
   // Create result display section

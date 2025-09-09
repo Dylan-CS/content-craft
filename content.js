@@ -254,6 +254,12 @@ function getDefaultPromptForStyle(style) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.type) {
+    case "GET_SELECTED_TEXT":
+      const selection = window.getSelection();
+      const selectedText = selection.toString().trim();
+      sendResponse({ selectedText: selectedText });
+      break;
+      
     case "PROCESSING":
       showNotification(request.message);
       break;
