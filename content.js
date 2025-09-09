@@ -1,47 +1,13 @@
-// This is the new, corrected version of content.js
-// It fixes the issue where the floating window does not appear on button click.
-
 let hoverButton = null;
-// Removed the global 'selectedText' variable to prevent scoping issues.
-
-console.log('ContentCraft extension loaded successfully');
-
-// Test basic functionality
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM fully loaded - extension should work now');
-  
-  // Test if we can create elements
-  const testDiv = document.createElement('div');
-  testDiv.textContent = 'Extension test';
-  testDiv.style.position = 'fixed';
-  testDiv.style.top = '10px';
-  testDiv.style.right = '10px';
-  testDiv.style.background = 'red';
-  testDiv.style.color = 'white';
-  testDiv.style.padding = '5px';
-  testDiv.style.zIndex = '999999';
-  document.body.appendChild(testDiv);
-  
-  setTimeout(() => {
-    testDiv.remove();
-    console.log('Extension test completed - element creation works');
-  }, 2000);
-});
 
 // Create hover button when text is selected
-document.addEventListener('mouseup', function(e) {
-  console.log('Mouseup event detected');
+document.addEventListener('mouseup', function() {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
   
-  console.log('Selection text:', selectedText, 'Length:', selectedText.length);
-  
   if (selectedText.length > 0 && !selection.isCollapsed) {
-    console.log('Showing hover button');
-    // Pass the selected text directly to the function
     showHoverButton(selectedText);
   } else {
-    console.log('Removing hover button - no selection');
     removeHoverButton();
   }
 });
@@ -58,59 +24,48 @@ document.addEventListener('mousedown', function(e) {
   }
 });
 
-// Now accepts selectedText as an argument
 function showHoverButton(text) {
-  console.log('showHoverButton called');
   removeHoverButton();
   
   hoverButton = document.createElement('div');
   hoverButton.innerHTML = '✨ AI Rewrite';
   hoverButton.style.cssText = `
     position: fixed;
-    background: #ff4444 !important; /* Bright red for visibility */
-    color: white !important;
-    padding: 8px 16px !important;
-    border-radius: 20px !important;
-    font-size: 14px !important;
-    font-weight: bold !important;
-    cursor: pointer !important;
-    z-index: 2147483647 !important; /* Maximum z-index */
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3) !important;
-    user-select: none !important;
-    border: 2px solid white !important;
-    pointer-events: auto !important;
+    background: #ff4444;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2147483647;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    user-select: none;
+    border: 2px solid white;
+    pointer-events: auto;
   `;
   
   hoverButton.addEventListener('mousedown', function(e) {
-    // Prevent the document mousedown from removing this button
     e.stopPropagation();
   });
   
-  // Use the 'text' argument instead of trying to get selection again
   hoverButton.addEventListener('click', function(e) {
-    console.log('Hover button clicked - event triggered');
     e.preventDefault();
     e.stopPropagation();
-    e.stopImmediatePropagation();
-    console.log('Selected text for floating window:', text);
     showFloatingWindow(text);
     return false;
   });
   
   document.body.appendChild(hoverButton);
   
-  // Position near the selection
   const range = window.getSelection().getRangeAt(0);
   const rect = range.getBoundingClientRect();
-  
-  console.log('Selection rect:', rect);
   
   const buttonWidth = 100;
   const buttonHeight = 30;
   let topPos = rect.top - 35;
   let leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2);
   
-  // Ensure button stays within viewport
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
   
@@ -119,45 +74,11 @@ function showHoverButton(text) {
   if (leftPos < 10) leftPos = 10;
   if (leftPos + buttonWidth > viewportWidth - 10) leftPos = viewportWidth - buttonWidth - 10;
   
-  console.log('Button position - Top:', topPos, 'Left:', leftPos);
-  console.log('Viewport - Width:', viewportWidth, 'Height:', viewportHeight);
-  
   hoverButton.style.top = topPos + 'px';
   hoverButton.style.left = leftPos + 'px';
   
-  // Make sure it's visible
   hoverButton.style.display = 'block';
   hoverButton.style.visibility = 'visible';
-  
-  console.log('Hover button created and positioned');
-  
-  // Debug: Add a temporary visible indicator
-  const debugIndicator = document.createElement('div');
-  debugIndicator.textContent = '🔴 BUTTON HERE - CLICK ME';
-  debugIndicator.style.position = 'fixed';
-  debugIndicator.style.top = (topPos - 25) + 'px';
-  debugIndicator.style.left = leftPos + 'px';
-  debugIndicator.style.background = 'yellow';
-  debugIndicator.style.color = 'black';
-  debugIndicator.style.padding = '2px 5px';
-  debugIndicator.style.zIndex = '2147483646';
-  debugIndicator.style.fontSize = '10px';
-  debugIndicator.style.cursor = 'pointer';
-  debugIndicator.addEventListener('click', function() {
-    console.log('Debug indicator clicked - testing if clicks work');
-    // Store reference to the current button
-    const currentButton = hoverButton;
-    if (currentButton) {
-      currentButton.click(); // Programmatically click the button
-    } else {
-      console.log('Hover button is null - it was removed');
-    }
-  });
-  document.body.appendChild(debugIndicator);
-  
-  setTimeout(() => {
-    debugIndicator.remove();
-  }, 5000);
 }
 
 function removeHoverButton() {
@@ -251,14 +172,6 @@ function showFloatingWindow(text) {
   `;
   
   document.body.appendChild(floatingWindow);
-  console.log('Floating window appended to body');
-  
-  // Debug: Check if floating window is actually in DOM
-  const checkWindow = document.querySelector('.ai-rewrite-floating-window');
-  console.log('Floating window in DOM:', !!checkWindow);
-  if (checkWindow) {
-    console.log('Window dimensions:', checkWindow.offsetWidth, 'x', checkWindow.offsetHeight);
-  }
   
   // Position near selection (fixed positioning)
   const windowWidth = 350;
@@ -445,7 +358,6 @@ function replaceSelectedText(newText) {
       
       return true;
     } catch (error) {
-      console.error('Error replacing text in contenteditable:', error);
       showNotification('Failed to replace text in this editor', true);
       return false;
     }
