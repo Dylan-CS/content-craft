@@ -41,14 +41,18 @@ function showHoverButton(event) {
   
   hoverButton.addEventListener('click', function(e) {
     e.stopPropagation();
-    showStyleSelection(event);
+    showPromptInputModal(window.getSelection().toString().trim(), event);
   });
   
   document.body.appendChild(hoverButton);
   
-  // Position near the mouse cursor
-  hoverButton.style.top = (event.clientY - 35) + 'px';
-  hoverButton.style.left = (event.clientX - 40) + 'px';
+  // Position near the selection - get selection bounds
+  const range = window.getSelection().getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+  
+  // Position button just above the selection
+  hoverButton.style.top = (rect.top - 35) + 'px';
+  hoverButton.style.left = (rect.left + window.scrollX) + 'px';
 }
 
 function removeHoverButton() {
@@ -58,68 +62,6 @@ function removeHoverButton() {
   }
 }
 
-function showStyleSelection(event) {
-  const selection = window.getSelection();
-  selectedText = selection.toString().trim();
-  
-  if (selectedText.length === 0) return;
-  
-  // Create style selection popup with prompt input option
-  const popup = document.createElement('div');
-  popup.innerHTML = `
-    <div style="padding: 16px; background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border: 1px solid #e0e0e0; min-width: 280px;">
-      <div style="font-weight: 600; margin-bottom: 12px; color: #2c3e50; font-size: 14px;">Choose rewrite style:</div>
-      <div style="margin-bottom: 12px;">
-        <button style="margin: 4px; padding: 10px 14px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="workplace">🏢 Workplace (Professional)</button>
-        <button style="margin: 4px; padding: 10px 14px; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="casual">💬 Casual (Friendly)</button>
-        <button style="margin: 4px; padding: 10px 14px; background: #9b59b6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="academic">🎓 Academic (Formal)</button>
-        <button style="margin: 4px; padding: 10px 14px; background: #f39c12; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="creative">🎨 Creative (Engaging)</button>
-        <button style="margin: 4px; padding: 10px 14px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%; text-align: left;" data-style="concise">✂️ Concise (Clear)</button>
-      </div>
-      <div style="border-top: 1px solid #eee; padding-top: 12px; margin-top: 8px;">
-        <button id="custom-prompt-btn" style="margin: 4px; padding: 10px 14px; background: #7f8c8d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; width: 100%;">
-          💡 Custom Prompt
-        </button>
-      </div>
-    </div>
-  `;
-  
-  popup.style.cssText = `
-    position: absolute;
-    z-index: 10001;
-    top: ${event.clientY + 10}px;
-    left: ${event.clientX - 140}px;
-  `;
-  
-  // Add event listeners to style buttons
-  const buttons = popup.querySelectorAll('button[data-style]');
-  buttons.forEach(button => {
-    button.addEventListener('click', function() {
-      const style = this.getAttribute('data-style');
-      processTextWithStyle(selectedText, style);
-      popup.remove();
-      removeHoverButton();
-    });
-  });
-  
-  // Add event listener for custom prompt button
-  const customPromptBtn = popup.querySelector('#custom-prompt-btn');
-  customPromptBtn.addEventListener('click', function() {
-    popup.remove();
-    showPromptInputModal(selectedText);
-  });
-  
-  // Close when clicking outside
-  const closePopup = function(e) {
-    if (!popup.contains(e.target)) {
-      popup.remove();
-      document.removeEventListener('mousedown', closePopup);
-    }
-  };
-  
-  document.addEventListener('mousedown', closePopup);
-  document.body.appendChild(popup);
-}
 
 function showPromptInputModal(text) {
   // Create modal for custom prompt input
@@ -218,18 +160,6 @@ function showPromptInputModal(text) {
   document.addEventListener('mousedown', closeModal);
 }
 
-function processTextWithStyle(text, style) {
-  const prompt = getDefaultPromptForStyle(style);
-  
-  // Send to background for processing
-  chrome.runtime.sendMessage({
-    type: "PROCESS_WITH_STYLE",
-    text: text,
-    style: style,
-    prompt: prompt
-  });
-}
-
 function processTextWithCustomPrompt(text, customPrompt) {
   // Send to background for processing with custom prompt
   chrome.runtime.sendMessage({
@@ -237,18 +167,6 @@ function processTextWithCustomPrompt(text, customPrompt) {
     text: text,
     prompt: customPrompt
   });
-}
-
-function getDefaultPromptForStyle(style) {
-  const stylePrompts = {
-    workplace: 'Rewrite this text to be more professional, clear, and appropriate for workplace communication.',
-    casual: 'Rewrite this text to be more casual, friendly, and suitable for informal conversations.',
-    academic: 'Rewrite this text in a formal, scholarly academic style with proper terminology and structure.',
-    creative: 'Rewrite this text to be more creative, engaging, and imaginative while maintaining the core meaning.',
-    concise: 'Rewrite this text to be more concise, clear, and to the point while preserving the essential information.'
-  };
-  
-  return stylePrompts[style] || stylePrompts.workplace;
 }
 
 chrome.runtime.onMessage.addListener((request) => {
