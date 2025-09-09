@@ -41,10 +41,13 @@ function showHoverButton(event) {
   
   hoverButton.addEventListener('click', function(e) {
     console.log('Hover button clicked');
+    e.preventDefault();
     e.stopPropagation();
+    e.stopImmediatePropagation();
     const selectedText = window.getSelection().toString().trim();
     console.log('Selected text:', selectedText);
     showPromptInputModal(selectedText);
+    return false;
   });
   
   document.body.appendChild(hoverButton);
@@ -177,6 +180,12 @@ function showPromptInputModal(text) {
   
   document.addEventListener('mousedown', closeModal);
 }
+
+// Test function to manually trigger modal
+globalThis.testShowModal = function() {
+  console.log('Manual test: showing modal');
+  showPromptInputModal('Test text for manual testing');
+};
 
 function processTextWithCustomPrompt(text, customPrompt) {
   // Send to background for processing with custom prompt
