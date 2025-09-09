@@ -1,13 +1,15 @@
 let hoverButton = null;
 let selectedText = '';
 
+console.log('ContentCraft extension loaded successfully');
+
 // Create hover button when text is selected
 document.addEventListener('mouseup', function(e) {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
   
   if (selectedText.length > 0 && !selection.isCollapsed) {
-    showHoverButton(e);
+    showHoverButton();
   } else {
     removeHoverButton();
   }
@@ -20,7 +22,7 @@ document.addEventListener('mousedown', function(e) {
   }
 });
 
-function showHoverButton(event) {
+function showHoverButton() {
   removeHoverButton();
   
   hoverButton = document.createElement('div');
@@ -101,7 +103,7 @@ function showFloatingWindow(text) {
       
       <div style="margin-bottom: 12px;">
         <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Selected Text:</div>
-        <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;">
+        <div id="selected-text-display" style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;">
           ${text.length > 150 ? text.substring(0, 150) + '...' : text}
         </div>
       </div>
