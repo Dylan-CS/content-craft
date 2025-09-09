@@ -15,7 +15,7 @@ document.addEventListener('mouseup', function(e) {
 
 // Hide button when clicking elsewhere
 document.addEventListener('mousedown', function(e) {
-  if (hoverButton && !hoverButton.contains(e.target)) {
+  if (hoverButton && !hoverButton.contains(e.target) && e.target.id !== 'close-float') {
     removeHoverButton();
   }
 });
@@ -90,7 +90,7 @@ function showPromptInputModal(text) {
   // Create floating window instead of modal
   const floatingWindow = document.createElement('div');
   floatingWindow.innerHTML = `
-    <div style="position: fixed; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 350px; max-width: 90vw; z-index: 2147483647; border: 1px solid #e0e0e0; display: block !important;">
+    <div style="position: absolute; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 350px; max-width: 90vw; z-index: 2147483647; border: 1px solid #e0e0e0; display: block !important;">
       <div style="font-weight: 600; margin-bottom: 12px; color: #2c3e50; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
         <span>AI Rewrite</span>
         <button id="close-float" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #95a5a6;">×</button>
@@ -136,35 +136,43 @@ function showPromptInputModal(text) {
   document.body.appendChild(floatingWindow);
   console.log('Floating window created and appended to body');
   
-  // Position floating window near selection
+  // Position floating window near selection - use absolute positioning relative to page
   const windowWidth = 350;
   const windowHeight = 300;
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
+  const scrollX = window.scrollX || window.pageXOffset;
+  const scrollY = window.scrollY || window.pageYOffset;
   
-  let topPos = rect.bottom + 10;
-  let leftPos = rect.left;
+  // Convert viewport coordinates to page coordinates
+  let topPos = rect.bottom + scrollY + 10;
+  let leftPos = rect.left + scrollX;
   
   console.log('Selection rect:', rect);
-  console.log('Viewport dimensions:', viewportWidth, viewportHeight);
+  console.log('Scroll position:', scrollX, scrollY);
   
   // Adjust position if it would go off screen
-  if (topPos + windowHeight > viewportHeight) {
-    topPos = rect.top - windowHeight - 10;
+  const pageWidth = document.documentElement.scrollWidth;
+  const pageHeight = document.documentElement.scrollHeight;
+  
+  if (topPos + windowHeight > scrollY + window.innerHeight) {
+    topPos = rect.top + scrollY - windowHeight - 10;
   }
-  if (leftPos + windowWidth > viewportWidth) {
-    leftPos = viewportWidth - windowWidth - 10;
+  if (leftPos + windowWidth > scrollX + window.innerWidth) {
+    leftPos = scrollX + window.innerWidth - windowWidth - 10;
   }
-  if (leftPos < 10) {
-    leftPos = 10;
+  if (leftPos < scrollX + 10) {
+    leftPos = scrollX + 10;
   }
   
+  // Ensure positions are within page bounds
+  topPos = Math.max(scrollY + 10, Math.min(topPos, pageHeight - windowHeight - 10));
+  leftPos = Math.max(scrollX + 10, Math.min(leftPos, pageWidth - windowWidth - 10));
+  
   const floatingDiv = floatingWindow.querySelector('div:first-child');
+  floatingDiv.style.position = 'absolute';
   floatingDiv.style.top = topPos + 'px';
   floatingDiv.style.left = leftPos + 'px';
   
   console.log('Floating window positioned at:', topPos, leftPos);
-  console.log('Floating window element:', floatingDiv);
   
   // Focus on textarea
   setTimeout(() => {
