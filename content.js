@@ -1,6 +1,8 @@
 let hoverButton = null;
 let selectedText = '';
 
+console.log('ContentCraft content script loaded successfully');
+
 // Create hover button when text is selected
 document.addEventListener('mouseup', function(e) {
   const selection = window.getSelection();
@@ -83,7 +85,7 @@ function showPromptInputModal(text) {
   // Create modal for custom prompt input
   const modal = document.createElement('div');
   modal.innerHTML = `
-    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10002; display: flex; align-items: center; justify-content: center;">
+    <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999999; display: flex; align-items: center; justify-content: center;">
       <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 400px; max-width: 90vw;">
         <div style="font-weight: 600; margin-bottom: 16px; color: #2c3e50; font-size: 16px;">Custom AI Rewrite</div>
         
@@ -186,6 +188,15 @@ globalThis.testShowModal = function() {
   console.log('Manual test: showing modal');
   showPromptInputModal('Test text for manual testing');
 };
+
+// Add test button to page for debugging
+const testBtn = document.createElement('button');
+testBtn.textContent = 'Test Modal';
+testBtn.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 999999; padding: 10px; background: red; color: white;';
+testBtn.onclick = function() {
+  testShowModal();
+};
+document.body.appendChild(testBtn);
 
 function processTextWithCustomPrompt(text, customPrompt) {
   // Send to background for processing with custom prompt
