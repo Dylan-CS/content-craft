@@ -40,8 +40,11 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
+    console.log('Hover button clicked');
     e.stopPropagation();
-    showPromptInputModal(window.getSelection().toString().trim(), event);
+    const selectedText = window.getSelection().toString().trim();
+    console.log('Selected text:', selectedText);
+    showPromptInputModal(selectedText);
   });
   
   document.body.appendChild(hoverButton);
@@ -50,9 +53,18 @@ function showHoverButton(event) {
   const range = window.getSelection().getRangeAt(0);
   const rect = range.getBoundingClientRect();
   
-  // Position button just above the selection
-  hoverButton.style.top = (rect.top - 35) + 'px';
-  hoverButton.style.left = (rect.left + window.scrollX) + 'px';
+  console.log('Selection rect:', rect);
+  console.log('Scroll position:', window.scrollX, window.scrollY);
+  
+  // Position button just above the selection, centered horizontally
+  const buttonWidth = 100; // Approximate button width
+  const topPos = rect.top + window.scrollY - 35;
+  const leftPos = rect.left + window.scrollX + (rect.width / 2) - (buttonWidth / 2);
+  
+  console.log('Button position:', topPos, leftPos);
+  
+  hoverButton.style.top = topPos + 'px';
+  hoverButton.style.left = leftPos + 'px';
 }
 
 function removeHoverButton() {
@@ -64,6 +76,7 @@ function removeHoverButton() {
 
 
 function showPromptInputModal(text) {
+  console.log('showPromptInputModal called with text:', text);
   // Create modal for custom prompt input
   const modal = document.createElement('div');
   modal.innerHTML = `
