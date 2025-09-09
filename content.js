@@ -15,7 +15,7 @@ document.addEventListener('mouseup', function(e) {
 
 // Hide button when clicking elsewhere
 document.addEventListener('mousedown', function(e) {
-  if (hoverButton && !hoverButton.contains(e.target) && e.target.id !== 'close-float') {
+  if (hoverButton && !hoverButton.contains(e.target)) {
     removeHoverButton();
   }
 });
@@ -26,7 +26,7 @@ function showHoverButton(event) {
   hoverButton = document.createElement('div');
   hoverButton.innerHTML = '✨ AI Rewrite';
   hoverButton.style.cssText = `
-    position: absolute;
+    position: fixed;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 6px 12px;
@@ -40,29 +40,23 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
-    console.log('Hover button clicked');
     e.preventDefault();
     e.stopPropagation();
-    e.stopImmediatePropagation();
     const selectedText = window.getSelection().toString().trim();
-    console.log('Selected text:', selectedText);
-    showPromptInputModal(selectedText);
+    showFloatingWindow(selectedText);
     return false;
   });
   
   document.body.appendChild(hoverButton);
   
-  // Position near the selection - get selection bounds
+  // Position near the selection
   const range = window.getSelection().getRangeAt(0);
   const rect = range.getBoundingClientRect();
   
-  // Position button just above the selection, centered horizontally
-  // Use fixed positioning to avoid scroll offset issues
-  const buttonWidth = 100; // Approximate button width
-  const topPos = rect.top - 35; // Relative to viewport
-  const leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2); // Relative to viewport
+  const buttonWidth = 100;
+  const topPos = rect.top - 35;
+  const leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2);
   
-  hoverButton.style.position = 'fixed';
   hoverButton.style.top = topPos + 'px';
   hoverButton.style.left = leftPos + 'px';
 }
@@ -74,40 +68,41 @@ function removeHoverButton() {
   }
 }
 
-
-function showPromptInputModal(text) {
-  console.log('showPromptInputModal called with text:', text);
-  // Save the selected text globally since selection might be lost when modal shows
+function showFloatingWindow(text) {
+  // Remove any existing floating window
+  const existingWindow = document.querySelector('.ai-rewrite-floating-window');
+  if (existingWindow) {
+    existingWindow.remove();
+  }
+  
   selectedText = text;
   
-  // Get selection position for floating window
+  // Get selection position
   const selection = window.getSelection();
   if (!selection.rangeCount) return;
   
   const range = selection.getRangeAt(0);
   const rect = range.getBoundingClientRect();
   
-  // Create floating window instead of modal
+  // Create floating window
   const floatingWindow = document.createElement('div');
+  floatingWindow.className = 'ai-rewrite-floating-window';
   floatingWindow.innerHTML = `
-    <div style="position: absolute; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 350px; max-width: 90vw; z-index: 2147483647; border: 1px solid #e0e0e0; display: block !important;">
+    <div style="position: fixed; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); width: 350px; max-width: 90vw; z-index: 2147483647; border: 1px solid #e0e0e0;">
       <div style="font-weight: 600; margin-bottom: 12px; color: #2c3e50; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
         <span>AI Rewrite</span>
         <button id="close-float" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #95a5a6;">×</button>
       </div>
       
       <div style="margin-bottom: 12px;">
-        <label for="selected-text-display" style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px; display: block;">Selected Text:</label>
-        <div 
-          id="selected-text-display"
-          style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;"
-        >
+        <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Selected Text:</div>
+        <div style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;">
           ${text.length > 150 ? text.substring(0, 150) + '...' : text}
         </div>
       </div>
       
       <div style="margin-bottom: 12px;">
-        <label for="custom-prompt-input" style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px; display: block;">Custom Prompt:</label>
+        <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Custom Prompt:</div>
         <textarea 
           id="custom-prompt-input" 
           name="custom-prompt"
@@ -134,45 +129,30 @@ function showPromptInputModal(text) {
   `;
   
   document.body.appendChild(floatingWindow);
-  console.log('Floating window created and appended to body');
   
-  // Position floating window near selection - use absolute positioning relative to page
+  // Position near selection (fixed positioning)
   const windowWidth = 350;
   const windowHeight = 300;
-  const scrollX = window.scrollX || window.pageXOffset;
-  const scrollY = window.scrollY || window.pageYOffset;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
   
-  // Convert viewport coordinates to page coordinates
-  let topPos = rect.bottom + scrollY + 10;
-  let leftPos = rect.left + scrollX;
-  
-  console.log('Selection rect:', rect);
-  console.log('Scroll position:', scrollX, scrollY);
+  let topPos = rect.bottom + 10;
+  let leftPos = rect.left;
   
   // Adjust position if it would go off screen
-  const pageWidth = document.documentElement.scrollWidth;
-  const pageHeight = document.documentElement.scrollHeight;
-  
-  if (topPos + windowHeight > scrollY + window.innerHeight) {
-    topPos = rect.top + scrollY - windowHeight - 10;
+  if (topPos + windowHeight > viewportHeight) {
+    topPos = rect.top - windowHeight - 10;
   }
-  if (leftPos + windowWidth > scrollX + window.innerWidth) {
-    leftPos = scrollX + window.innerWidth - windowWidth - 10;
+  if (leftPos + windowWidth > viewportWidth) {
+    leftPos = viewportWidth - windowWidth - 10;
   }
-  if (leftPos < scrollX + 10) {
-    leftPos = scrollX + 10;
+  if (leftPos < 10) {
+    leftPos = 10;
   }
-  
-  // Ensure positions are within page bounds
-  topPos = Math.max(scrollY + 10, Math.min(topPos, pageHeight - windowHeight - 10));
-  leftPos = Math.max(scrollX + 10, Math.min(leftPos, pageWidth - windowWidth - 10));
   
   const floatingDiv = floatingWindow.querySelector('div:first-child');
-  floatingDiv.style.position = 'absolute';
   floatingDiv.style.top = topPos + 'px';
   floatingDiv.style.left = leftPos + 'px';
-  
-  console.log('Floating window positioned at:', topPos, leftPos);
   
   // Focus on textarea
   setTimeout(() => {
@@ -182,7 +162,7 @@ function showPromptInputModal(text) {
     }
   }, 100);
   
-  // Add event listeners for template buttons
+  // Add event listeners
   const templateButtons = floatingWindow.querySelectorAll('button[data-prompt]');
   templateButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -197,12 +177,14 @@ function showPromptInputModal(text) {
   const closeBtn = floatingWindow.querySelector('#close-float');
   closeBtn.addEventListener('click', function() {
     floatingWindow.remove();
+    removeHoverButton();
   });
   
   // Cancel button
   const cancelBtn = floatingWindow.querySelector('#cancel-prompt');
   cancelBtn.addEventListener('click', function() {
     floatingWindow.remove();
+    removeHoverButton();
   });
   
   // Submit button
@@ -216,7 +198,6 @@ function showPromptInputModal(text) {
       floatingWindow.remove();
       removeHoverButton();
     } else {
-      // Show validation error
       promptInput.style.borderColor = '#e74c3c';
       setTimeout(() => {
         promptInput.style.borderColor = '#ddd';
@@ -224,22 +205,20 @@ function showPromptInputModal(text) {
     }
   });
   
-  // Close floating window when clicking outside
-  const closeFloating = function(e) {
+  // Close when clicking outside
+  const closeOnClickOutside = function(e) {
     if (!floatingWindow.contains(e.target) && e.target !== hoverButton) {
       floatingWindow.remove();
-      document.removeEventListener('mousedown', closeFloating);
+      document.removeEventListener('mousedown', closeOnClickOutside);
     }
   };
   
   setTimeout(() => {
-    document.addEventListener('mousedown', closeFloating);
+    document.addEventListener('mousedown', closeOnClickOutside);
   }, 100);
 }
 
-
 function processTextWithCustomPrompt(text, customPrompt) {
-  // Send to background for processing with custom prompt
   chrome.runtime.sendMessage({
     type: "PROCESS_WITH_CUSTOM_PROMPT",
     text: text,
@@ -254,14 +233,12 @@ chrome.runtime.onMessage.addListener((request) => {
       break;
       
     case "RESULT":
-      // Send result to popup if it's open
       chrome.runtime.sendMessage({
         type: "SHOW_RESULT_IN_POPUP",
         text: request.text,
         originalText: window.getSelection().toString().trim()
       });
       
-      // Also try to replace text on page
       const success = replaceSelectedText(request.text);
       if (!success) {
         chrome.runtime.sendMessage({
@@ -311,7 +288,6 @@ function replaceSelectedText(newText) {
   const range = selection.getRangeAt(0);
   const activeElement = document.activeElement;
   
-  // Handle regular input/textarea elements
   if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
     const start = activeElement.selectionStart;
     const end = activeElement.selectionEnd;
@@ -326,14 +302,12 @@ function replaceSelectedText(newText) {
     return true;
   }
   
-  // Handle contenteditable elements and rich text editors
   if (range && !range.collapsed) {
     try {
       range.deleteContents();
       const textNode = document.createTextNode(newText);
       range.insertNode(textNode);
       
-      // Move selection to the end of the inserted text
       const newRange = document.createRange();
       newRange.setStartAfter(textNode);
       newRange.collapse(true);
