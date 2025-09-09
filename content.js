@@ -119,11 +119,16 @@ function showPromptInputModal(text) {
   `;
   
   document.body.appendChild(modal);
+  console.log('Modal appended to DOM');
   
   // Focus on textarea
   setTimeout(() => {
     const textarea = modal.querySelector('#custom-prompt-input');
-    if (textarea) textarea.focus();
+    console.log('Textarea found:', textarea);
+    if (textarea) {
+      textarea.focus();
+      console.log('Textarea focused');
+    }
   }, 100);
   
   // Add event listeners for template buttons
