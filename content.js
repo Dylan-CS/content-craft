@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('mouseup', function(e) {
   console.log('Mouseup event detected');
   const selection = window.getSelection();
-  const selectedText = selection.toString().trim();
+  selectedText = selection.toString().trim();
   
   console.log('Selection text:', selectedText, 'Length:', selectedText.length);
   
@@ -81,16 +81,15 @@ function showHoverButton() {
     e.stopPropagation();
   });
   
-  hoverButton.addEventListener('click', function(e) {
-    console.log('Hover button clicked - event triggered');
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    const selectedText = window.getSelection().toString().trim();
-    console.log('Selected text for floating window:', selectedText);
-    showFloatingWindow(selectedText);
-    return false;
-  });
+hoverButton.addEventListener('click', function(e) {
+  console.log('Hover button clicked - event triggered');
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  console.log('Selected text for floating window:', selectedText);
+  showFloatingWindow(selectedText); 
+  return false;
+});
   
   document.body.appendChild(hoverButton);
   
