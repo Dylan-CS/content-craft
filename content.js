@@ -3,14 +3,41 @@ let selectedText = '';
 
 console.log('ContentCraft extension loaded successfully');
 
+// Test basic functionality
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM fully loaded - extension should work now');
+  
+  // Test if we can create elements
+  const testDiv = document.createElement('div');
+  testDiv.textContent = 'Extension test';
+  testDiv.style.position = 'fixed';
+  testDiv.style.top = '10px';
+  testDiv.style.right = '10px';
+  testDiv.style.background = 'red';
+  testDiv.style.color = 'white';
+  testDiv.style.padding = '5px';
+  testDiv.style.zIndex = '999999';
+  document.body.appendChild(testDiv);
+  
+  setTimeout(() => {
+    testDiv.remove();
+    console.log('Extension test completed - element creation works');
+  }, 2000);
+});
+
 // Create hover button when text is selected
 document.addEventListener('mouseup', function(e) {
+  console.log('Mouseup event detected');
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
   
+  console.log('Selection text:', selectedText, 'Length:', selectedText.length);
+  
   if (selectedText.length > 0 && !selection.isCollapsed) {
+    console.log('Showing hover button');
     showHoverButton();
   } else {
+    console.log('Removing hover button - no selection');
     removeHoverButton();
   }
 });
@@ -28,6 +55,7 @@ document.addEventListener('mousedown', function(e) {
 });
 
 function showHoverButton() {
+  console.log('showHoverButton called');
   removeHoverButton();
   
   hoverButton = document.createElement('div');
