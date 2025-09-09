@@ -58,6 +58,13 @@ function showHoverButton(event) {
   hoverButton.addEventListener('mousedown', function(e) {
     console.log('Hover button mousedown event');
     e.stopPropagation();
+    // Don't prevent default to allow click event to trigger
+  });
+  
+  // Add mouseup listener to debug
+  hoverButton.addEventListener('mouseup', function(e) {
+    console.log('Hover button mouseup event');
+    e.stopPropagation();
   });
   
   document.body.appendChild(hoverButton);
@@ -70,12 +77,14 @@ function showHoverButton(event) {
   console.log('Scroll position:', window.scrollX, window.scrollY);
   
   // Position button just above the selection, centered horizontally
+  // Use fixed positioning to avoid scroll offset issues
   const buttonWidth = 100; // Approximate button width
-  const topPos = rect.top + window.scrollY - 35;
-  const leftPos = rect.left + window.scrollX + (rect.width / 2) - (buttonWidth / 2);
+  const topPos = rect.top - 35; // Relative to viewport
+  const leftPos = rect.left + (rect.width / 2) - (buttonWidth / 2); // Relative to viewport
   
   console.log('Button position:', topPos, leftPos);
   
+  hoverButton.style.position = 'fixed';
   hoverButton.style.top = topPos + 'px';
   hoverButton.style.left = leftPos + 'px';
 }
