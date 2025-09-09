@@ -40,10 +40,12 @@ function showHoverButton(event) {
   `;
   
   hoverButton.addEventListener('click', function(e) {
+    console.log('Hover button clicked');
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     const selectedText = window.getSelection().toString().trim();
+    console.log('Selected text:', selectedText);
     showPromptInputModal(selectedText);
     return false;
   });
@@ -74,6 +76,7 @@ function removeHoverButton() {
 
 
 function showPromptInputModal(text) {
+  console.log('showPromptInputModal called with text:', text);
   // Save the selected text globally since selection might be lost when modal shows
   selectedText = text;
   
@@ -127,6 +130,7 @@ function showPromptInputModal(text) {
   `;
   
   document.body.appendChild(floatingWindow);
+  console.log('Floating window created and appended to body');
   
   // Position floating window near selection
   const windowWidth = 350;
@@ -136,6 +140,9 @@ function showPromptInputModal(text) {
   
   let topPos = rect.bottom + 10;
   let leftPos = rect.left;
+  
+  console.log('Selection rect:', rect);
+  console.log('Viewport dimensions:', viewportWidth, viewportHeight);
   
   // Adjust position if it would go off screen
   if (topPos + windowHeight > viewportHeight) {
