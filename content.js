@@ -21,6 +21,13 @@ document.addEventListener('mouseup', function() {
 // Hide button when clicking elsewhere (simplified)
 document.addEventListener('mousedown', function(e) {
   console.log('Global mousedown event, target:', e.target?.className || e.target);
+
+  // Don't remove button if we're clicking on it or if we just set the flag
+  if (isClickingButton) {
+    console.log('Not removing button - click in progress');
+    return;
+  }
+
   if (hoverButton && e.target !== hoverButton && !hoverButton.contains(e.target)) {
     console.log('Removing hover button due to outside click');
     removeHoverButton();
@@ -42,6 +49,7 @@ function showHoverButton(text) {
   // Add event listeners AFTER the button is in the DOM
   hoverButton.addEventListener('mousedown', function(e) {
     console.log('Button mousedown event');
+    isClickingButton = true; // Set flag immediately on mousedown
     e.stopPropagation();
   });
 
