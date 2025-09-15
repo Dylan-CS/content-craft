@@ -29,10 +29,13 @@ function showHoverButton(text) {
   hoverButton.className = 'ai-rewrite-hover-button';
   hoverButton.innerHTML = '✨';
   
+  document.body.appendChild(hoverButton);
+
+  // Add event listeners AFTER the button is in the DOM
   hoverButton.addEventListener('mousedown', function(e) {
     e.stopPropagation();
   });
-  
+
   hoverButton.addEventListener('click', function(e) {
     console.log('AI rewrite button clicked - event triggered');
     e.preventDefault();
@@ -41,8 +44,6 @@ function showHoverButton(text) {
     showFloatingWindow(text);
     return false;
   });
-  
-  document.body.appendChild(hoverButton);
   
   const selection = window.getSelection();
   const range = selection.getRangeAt(0);
