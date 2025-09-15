@@ -1,10 +1,16 @@
 let hoverButton = null;
+let isClickingButton = false;
 
 // Create hover button when text is selected
 document.addEventListener('mouseup', function() {
+  if (isClickingButton) {
+    isClickingButton = false;
+    return; // Don't recreate button if we just clicked on it
+  }
+
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
-  
+
   if (selectedText.length > 0 && !selection.isCollapsed) {
     showHoverButton(selectedText);
   } else {
@@ -41,6 +47,7 @@ function showHoverButton(text) {
 
   hoverButton.addEventListener('click', function(e) {
     console.log('AI rewrite button clicked - event triggered');
+    isClickingButton = true; // Set flag to prevent recreation
     e.preventDefault();
     e.stopPropagation();
     console.log('Calling showFloatingWindow with text:', text);
