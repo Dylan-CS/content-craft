@@ -283,22 +283,22 @@ function showResultWindow(originalText, rewrittenText) {
       <span>AI Rewrite Result</span>
       <button id="close-result" class="close-button">×</button>
     </div>
-    <div style="margin-bottom: 12px;">
+    <div class="result-section">
       <div class="section-title">Original Text:</div>
-      <div class="selected-text-display">
-        ${originalText.length > 150 ? originalText.substring(0, 150) + '...' : originalText}
+      <div class="selected-text-display original-text">
+        ${originalText}
       </div>
     </div>
-    <div style="margin-bottom: 12px;">
+    <div class="result-section">
       <div class="section-title">Rewritten Text:</div>
-      <div class="selected-text-display" style="background: #e8f5e8; border-color: #c8e6c9;">
-        ${rewrittenText.length > 150 ? rewrittenText.substring(0, 150) + '...' : rewrittenText}
+      <div class="selected-text-display rewritten-text">
+        ${rewrittenText}
       </div>
     </div>
-    <div style="margin-bottom: 12px;">
+    <div class="result-section">
       <div class="section-title">Actions:</div>
       <div class="action-buttons-container">
-        <button id="copy-result" class="action-button submit-button" style="background: #27ae60;">Copy Result</button>
+        <button id="copy-result" class="action-button copy-button">Copy Result</button>
         <button id="replace-text" class="action-button submit-button">Replace on Page</button>
         <button id="close-result-btn" class="action-button cancel-button">Close</button>
       </div>
