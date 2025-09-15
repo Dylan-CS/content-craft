@@ -28,22 +28,8 @@ function showHoverButton(text) {
   removeHoverButton();
   
   hoverButton = document.createElement('div');
+  hoverButton.className = 'ai-rewrite-hover-button';
   hoverButton.innerHTML = '✨ AI Rewrite';
-  hoverButton.style.cssText = `
-    position: fixed;
-    background: #ff4444;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 2147483647;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    user-select: none;
-    border: 2px solid white;
-    pointer-events: auto;
-  `;
   
   hoverButton.addEventListener('mousedown', function(e) {
     e.stopPropagation();
@@ -58,7 +44,8 @@ function showHoverButton(text) {
   
   document.body.appendChild(hoverButton);
   
-  const range = window.getSelection().getRangeAt(0);
+  const selection = window.getSelection();
+  const range = selection.getRangeAt(0);
   const rect = range.getBoundingClientRect();
   
   const buttonWidth = 100;
@@ -101,86 +88,74 @@ function showFloatingWindow(text) {
     return;
   }
 
-  // 移除任何已存在的浮动窗口
+  // Remove any existing floating window
   const existingWindow = document.querySelector('.ai-rewrite-floating-window');
   if (existingWindow) {
     console.log('Removed existing floating window');
     existingWindow.remove();
   }
 
-  // 存储原始文本供后续使用
+  // Store original text for later use
   originalText = text;
 
-  // 保存当前选区范围
+  // Save current selection range
   const selection = window.getSelection();
   if (selection.rangeCount > 0) {
     lastSelectionRange = selection.getRangeAt(0).cloneRange();
   }
   
-  // 创建浮动窗口
+  // Create floating window
   floatingWindow = document.createElement('div');
   floatingWindow.className = 'ai-rewrite-floating-window';
-  floatingWindow.style.cssText = `
-    position: fixed;
-    background: white;
-    padding: 16px;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    width: 350px;
-    max-width: 90vw;
-    z-index: 2147483647;
-    border: 1px solid #e0e0e0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  `;
   floatingWindow.innerHTML = `
-    <div style="font-weight: 600; margin-bottom: 12px; color: #2c3e50; font-size: 14px; display: flex; justify-content: space-between; align-items: center;">
+    <div class="floating-window-header">
       <span>AI Rewrite</span>
-      <button id="close-float" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #95a5a6;">×</button>
+      <button id="close-float" class="close-button">×</button>
     </div>
     <div style="margin-bottom: 12px;">
-      <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Selected Text:</div>
-      <div id="selected-text-display" style="background: #f8f9fa; padding: 8px; border-radius: 4px; border: 1px solid #e9ecef; font-size: 12px; color: #495057; max-height: 60px; overflow-y: auto;">
+      <div class="section-title">Selected Text:</div>
+      <div id="selected-text-display" class="selected-text-display">
         ${text.length > 150 ? text.substring(0, 150) + '...' : text}
       </div>
     </div>
     <div style="margin-bottom: 12px;">
-      <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Custom Prompt:</div>
-      <textarea id="custom-prompt-input" name="custom-prompt" placeholder="Enter your custom instructions..." style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+      <div class="section-title">Custom Prompt:</div>
+      <textarea id="custom-prompt-input" name="custom-prompt" placeholder="Enter your custom instructions..." class="custom-prompt-input"></textarea>
     </div>
     <div style="margin-bottom: 12px;">
-      <div style="font-weight: 500; margin-bottom: 6px; color: #34495e; font-size: 12px;">Quick Templates:</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
-        <button style="padding: 4px 8px; background: #e3f2fd; border: 1px solid #bbdefb; border-radius: 3px; cursor: pointer; font-size: 10px; color: #1976d2;" data-prompt="Make this more professional and business-appropriate">Professional</button>
-        <button style="padding: 4px 8px; background: #f3e5f5; border: 1px solid #e1bee7; border-radius: 3px; cursor: pointer; font-size: 10px; color: #7b1fa2;" data-prompt="Make this more casual and friendly">Casual</button>
-        <button style="padding: 4px 8px; background: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 3px; cursor: pointer; font-size: 10px; color: #388e3c;" data-prompt="Make this more concise and clear">Concise</button>
-        <button style="padding: 4px 8px; background: #fff3e0; border: 1px solid #ffe0b2; border-radius: 3px; cursor: pointer; font-size: 10px; color: #f57c00;" data-prompt="Make this more creative and engaging">Creative</button>
+      <div class="section-title">Quick Templates:</div>
+      <div class="template-buttons-container">
+        <button class="template-button professional" data-prompt="Make this more professional and business-appropriate">Professional</button>
+        <button class="template-button casual" data-prompt="Make this more casual and friendly">Casual</button>
+        <button class="template-button concise" data-prompt="Make this more concise and clear">Concise</button>
+        <button class="template-button creative" data-prompt="Make this more creative and engaging">Creative</button>
       </div>
     </div>
-    <div style="display: flex; gap: 6px; justify-content: flex-end;">
-      <button id="cancel-prompt" style="padding: 8px 12px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Cancel</button>
-      <button id="submit-prompt" style="padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">Rewrite</button>
+    <div class="action-buttons-container">
+      <button id="cancel-prompt" class="action-button cancel-button">Cancel</button>
+      <button id="submit-prompt" class="action-button submit-button">Rewrite</button>
     </div>
   `;
   
   document.body.appendChild(floatingWindow);
 
-  // --- 开始：新的窗口定位逻辑 ---
-  const selection = window.getSelection();
+  // --- Start: New window positioning logic ---
   let topPos, leftPos;
-  
+
   const windowWidth = 350;
-  const windowHeight = floatingWindow.offsetHeight || 280; // 使用实际高度或备用值
+  const windowHeight = floatingWindow.offsetHeight || 280; // Use actual height or fallback
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
 
-  if (selection && selection.rangeCount > 0 && selection.toString().trim().length > 0) {
-    // 如果选区存在，则相对于它定位
+  const selectedText = selection ? selection.toString().trim() : '';
+  if (selection && selection.rangeCount > 0 && selectedText.length > 0) {
+    // If selection exists, position relative to it
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
     topPos = rect.bottom + 10;
     leftPos = rect.left;
 
-    // 如果窗口会超出屏幕，则调整位置
+    // Adjust position if window would go off-screen
     if (topPos + windowHeight > viewportHeight) {
       topPos = rect.top - windowHeight - 10;
     }
@@ -188,20 +163,20 @@ function showFloatingWindow(text) {
       leftPos = viewportWidth - windowWidth - 10;
     }
   } else {
-    // 备用方案：将窗口定位在屏幕中央
+    // Fallback: center the window on screen
     topPos = (viewportHeight - windowHeight) / 2;
     leftPos = (viewportWidth - windowWidth) / 2;
   }
 
-  // 最后的边界检查，防止窗口紧贴边缘
+  // Final boundary check to prevent window from touching edges
   if (leftPos < 10) leftPos = 10;
   if (topPos < 10) topPos = 10;
 
   floatingWindow.style.top = topPos + 'px';
   floatingWindow.style.left = leftPos + 'px';
-  // --- 结束：新的窗口定位逻辑 ---
+  // --- End: New window positioning logic ---
   
-  // 让输入框自动获得焦点
+  // Auto-focus the input field
   setTimeout(() => {
     const textarea = floatingWindow.querySelector('#custom-prompt-input');
     if (textarea) {
@@ -209,7 +184,7 @@ function showFloatingWindow(text) {
     }
   }, 100);
   
-  // 添加事件监听器
+  // Add event listeners
   const templateButtons = floatingWindow.querySelectorAll('button[data-prompt]');
   templateButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -220,21 +195,21 @@ function showFloatingWindow(text) {
     });
   });
   
-  // 关闭按钮
+  // Close button
   const closeBtn = floatingWindow.querySelector('#close-float');
   closeBtn.addEventListener('click', function() {
     floatingWindow.remove();
     removeHoverButton();
   });
   
-  // 取消按钮
+  // Cancel button
   const cancelBtn = floatingWindow.querySelector('#cancel-prompt');
   cancelBtn.addEventListener('click', function() {
     floatingWindow.remove();
     removeHoverButton();
   });
   
-  // 提交按钮
+  // Submit button
   const submitBtn = floatingWindow.querySelector('#submit-prompt');
   submitBtn.addEventListener('click', function() {
     const promptInput = floatingWindow.querySelector('#custom-prompt-input');
@@ -252,7 +227,7 @@ function showFloatingWindow(text) {
     }
   });
   
-  // 点击外部区域关闭窗口
+  // Close window when clicking outside
   const closeOnClickOutside = function(e) {
     if (floatingWindow && !floatingWindow.contains(e.target) && e.target !== hoverButton) {
       floatingWindow.remove();
@@ -328,6 +303,42 @@ function showNotification(message, isError = false) {
   }, 3000);
 }
 
+// Helper function to replace text in input/textarea elements
+function replaceInputText(activeElement, newText) {
+  const start = activeElement.selectionStart;
+  const end = activeElement.selectionEnd;
+
+  const currentValue = activeElement.value;
+  const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
+
+  activeElement.value = newValue;
+  activeElement.selectionStart = start;
+  activeElement.selectionEnd = start + newText.length;
+  activeElement.focus();
+  return true;
+}
+
+// Helper function to replace text in contenteditable areas
+function replaceContentEditableText(range, selection, newText) {
+  try {
+    range.deleteContents();
+    const textNode = document.createTextNode(newText);
+    range.insertNode(textNode);
+
+    const newRange = document.createRange();
+    newRange.setStartAfter(textNode);
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    return true;
+  } catch (error) {
+    console.error('Error replacing text:', error);
+    showNotification('Failed to replace text in this editor', true);
+    return false;
+  }
+}
+
 function replaceSelectedText(newText) {
   const selection = window.getSelection();
   const activeElement = document.activeElement;
@@ -337,41 +348,14 @@ function replaceSelectedText(newText) {
     try {
       selection.removeAllRanges();
       selection.addRange(lastSelectionRange);
-
       const range = selection.getRangeAt(0);
 
       if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
-        const start = activeElement.selectionStart;
-        const end = activeElement.selectionEnd;
-
-        const currentValue = activeElement.value;
-        const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
-
-        activeElement.value = newValue;
-        activeElement.selectionStart = start;
-        activeElement.selectionEnd = start + newText.length;
-        activeElement.focus();
-        return true;
+        return replaceInputText(activeElement, newText);
       }
 
       if (range && !range.collapsed) {
-        try {
-          range.deleteContents();
-          const textNode = document.createTextNode(newText);
-          range.insertNode(textNode);
-
-          const newRange = document.createRange();
-          newRange.setStartAfter(textNode);
-          newRange.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-
-          return true;
-        } catch (error) {
-          console.error('Error replacing text:', error);
-          showNotification('Failed to replace text in this editor', true);
-          return false;
-        }
+        return replaceContentEditableText(range, selection, newText);
       }
     } catch (error) {
       console.log('Saved selection invalid, trying current selection');
@@ -387,36 +371,11 @@ function replaceSelectedText(newText) {
   const range = selection.getRangeAt(0);
 
   if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
-    const start = activeElement.selectionStart;
-    const end = activeElement.selectionEnd;
-
-    const currentValue = activeElement.value;
-    const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
-
-    activeElement.value = newValue;
-    activeElement.selectionStart = start;
-    activeElement.selectionEnd = start + newText.length;
-    activeElement.focus();
-    return true;
+    return replaceInputText(activeElement, newText);
   }
 
   if (range && !range.collapsed) {
-    try {
-      range.deleteContents();
-      const textNode = document.createTextNode(newText);
-      range.insertNode(textNode);
-
-      const newRange = document.createRange();
-      newRange.setStartAfter(textNode);
-      newRange.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-
-      return true;
-    } catch (error) {
-      showNotification('Failed to replace text in this editor', true);
-      return false;
-    }
+    return replaceContentEditableText(range, selection, newText);
   }
 
   showNotification('Please select text in an editable area', true);

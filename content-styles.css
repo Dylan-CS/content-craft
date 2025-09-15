@@ -1,0 +1,167 @@
+/* Content Script Styles for ContentCraft AI */
+
+/* Hover Button Styles */
+.ai-rewrite-hover-button {
+  position: fixed;
+  background: #ff4444;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 2147483647;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  user-select: none;
+  border: 2px solid white;
+  pointer-events: auto;
+  display: none;
+  visibility: hidden;
+}
+
+/* Floating Window Styles */
+.ai-rewrite-floating-window {
+  position: fixed;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  width: 350px;
+  max-width: 90vw;
+  z-index: 2147483647;
+  border: 1px solid #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.floating-window-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #2c3e50;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #95a5a6;
+}
+
+.section-title {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #34495e;
+  font-size: 12px;
+}
+
+.selected-text-display {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  font-size: 12px;
+  color: #495057;
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+.custom-prompt-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.template-buttons-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.template-button {
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  border: 1px solid;
+}
+
+.template-button.professional {
+  background: #e3f2fd;
+  border-color: #bbdefb;
+  color: #1976d2;
+}
+
+.template-button.casual {
+  background: #f3e5f5;
+  border-color: #e1bee7;
+  color: #7b1fa2;
+}
+
+.template-button.concise {
+  background: #e8f5e8;
+  border-color: #c8e6c9;
+  color: #388e3c;
+}
+
+.template-button.creative {
+  background: #fff3e0;
+  border-color: #ffe0b2;
+  color: #f57c00;
+}
+
+.action-buttons-container {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.action-button {
+  padding: 8px 12px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.cancel-button {
+  background: #95a5a6;
+}
+
+.submit-button {
+  background: #3498db;
+  font-weight: 500;
+}
+
+/* Notification Styles */
+.ai-rewrite-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  color: white;
+  border-radius: 8px;
+  z-index: 10000;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.notification-success {
+  background: #2ed573;
+}
+
+.notification-error {
+  background: #ff4757;
+}
