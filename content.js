@@ -250,10 +250,14 @@ function showFloatingWindow(text) {
 }
 
 function processTextWithCustomPrompt(text, customPrompt) {
+  console.log('Sending message to background script');
   chrome.runtime.sendMessage({
     type: "PROCESS_WITH_CUSTOM_PROMPT",
     text: text,
     prompt: customPrompt
+  }).catch(error => {
+    console.error('Error sending message to background:', error);
+    showNotification('Extension communication error', true);
   });
 }
 
