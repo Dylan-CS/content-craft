@@ -91,24 +91,31 @@ function removeHoverButton() {
 // Global variable for floating window
 let floatingWindow = null;
 let originalText = '';
+let lastSelectionRange = null;
 
 function showFloatingWindow(text) {
   console.log('showFloatingWindow called with text:', text);
-  
+
   if (!text || text.length === 0) {
     console.log('No text provided to showFloatingWindow');
     return;
   }
-  
+
   // 移除任何已存在的浮动窗口
   const existingWindow = document.querySelector('.ai-rewrite-floating-window');
   if (existingWindow) {
     console.log('Removed existing floating window');
     existingWindow.remove();
   }
-  
+
   // 存储原始文本供后续使用
   originalText = text;
+
+  // 保存当前选区范围
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    lastSelectionRange = selection.getRangeAt(0).cloneRange();
+  }
   
   // 创建浮动窗口
   floatingWindow = document.createElement('div');
@@ -323,48 +330,95 @@ function showNotification(message, isError = false) {
 
 function replaceSelectedText(newText) {
   const selection = window.getSelection();
-  
+  const activeElement = document.activeElement;
+
+  // Try to use saved selection range first
+  if (lastSelectionRange) {
+    try {
+      selection.removeAllRanges();
+      selection.addRange(lastSelectionRange);
+
+      const range = selection.getRangeAt(0);
+
+      if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
+        const start = activeElement.selectionStart;
+        const end = activeElement.selectionEnd;
+
+        const currentValue = activeElement.value;
+        const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
+
+        activeElement.value = newValue;
+        activeElement.selectionStart = start;
+        activeElement.selectionEnd = start + newText.length;
+        activeElement.focus();
+        return true;
+      }
+
+      if (range && !range.collapsed) {
+        try {
+          range.deleteContents();
+          const textNode = document.createTextNode(newText);
+          range.insertNode(textNode);
+
+          const newRange = document.createRange();
+          newRange.setStartAfter(textNode);
+          newRange.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+
+          return true;
+        } catch (error) {
+          console.error('Error replacing text:', error);
+          showNotification('Failed to replace text in this editor', true);
+          return false;
+        }
+      }
+    } catch (error) {
+      console.log('Saved selection invalid, trying current selection');
+    }
+  }
+
+  // Fallback to current selection
   if (!selection.rangeCount || selection.toString().trim() === '') {
     showNotification('Please select text to rewrite', true);
     return false;
   }
-  
+
   const range = selection.getRangeAt(0);
-  const activeElement = document.activeElement;
-  
+
   if (activeElement && (activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'INPUT')) {
     const start = activeElement.selectionStart;
     const end = activeElement.selectionEnd;
-    
+
     const currentValue = activeElement.value;
     const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
-    
+
     activeElement.value = newValue;
     activeElement.selectionStart = start;
     activeElement.selectionEnd = start + newText.length;
     activeElement.focus();
     return true;
   }
-  
+
   if (range && !range.collapsed) {
     try {
       range.deleteContents();
       const textNode = document.createTextNode(newText);
       range.insertNode(textNode);
-      
+
       const newRange = document.createRange();
       newRange.setStartAfter(textNode);
       newRange.collapse(true);
       selection.removeAllRanges();
       selection.addRange(newRange);
-      
+
       return true;
     } catch (error) {
       showNotification('Failed to replace text in this editor', true);
       return false;
     }
   }
-  
+
   showNotification('Please select text in an editable area', true);
   return false;
 }

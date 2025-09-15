@@ -9,16 +9,28 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "ai-rewrite" && info.selectionText) {
     const selectedText = info.selectionText.trim();
-    
+
     if (selectedText.length === 0) {
       return;
     }
 
     // Show style selection for right-click menu too
-    chrome.tabs.sendMessage(tab.id, {
-      type: "SHOW_STYLE_SELECTION",
-      text: selectedText
-    });
+    // Use a small delay to ensure content script is ready
+    setTimeout(() => {
+      chrome.tabs.sendMessage(tab.id, {
+        type: "SHOW_STYLE_SELECTION",
+        text: selectedText
+      }).catch(error => {
+        console.log('Content script not ready, retrying...');
+        // Retry after a longer delay
+        setTimeout(() => {
+          chrome.tabs.sendMessage(tab.id, {
+            type: "SHOW_STYLE_SELECTION",
+            text: selectedText
+          });
+        }, 500);
+      });
+    }, 100);
   }
 });
 
