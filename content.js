@@ -132,16 +132,20 @@ function showFloatingWindow(text) {
       <span>AI Rewrite</span>
       <button id="close-float" class="close-button">×</button>
     </div>
+
+    <!-- Input Section -->
     <div style="margin-bottom: 12px;">
       <div class="section-title">Selected Text:</div>
       <div id="selected-text-display" class="selected-text-display">
         ${text.length > 150 ? text.substring(0, 150) + '...' : text}
       </div>
     </div>
+
     <div style="margin-bottom: 12px;">
       <div class="section-title">Custom Prompt:</div>
       <textarea id="custom-prompt-input" name="custom-prompt" placeholder="Enter your custom instructions..." class="custom-prompt-input"></textarea>
     </div>
+
     <div style="margin-bottom: 12px;">
       <div class="section-title">Quick Templates:</div>
       <div class="template-buttons-container">
@@ -151,9 +155,24 @@ function showFloatingWindow(text) {
         <button class="template-button creative" data-prompt="Make this more creative and engaging">Creative</button>
       </div>
     </div>
+
+    <!-- Result Section (initially hidden) -->
+    <div id="result-section" style="display: none; margin-bottom: 12px;">
+      <div class="section-title">Rewritten Text:</div>
+      <div id="rewritten-text-display" class="selected-text-display rewritten-text">
+      </div>
+    </div>
+
     <div class="action-buttons-container">
       <button id="cancel-prompt" class="action-button cancel-button">Cancel</button>
       <button id="submit-prompt" class="action-button submit-button">Rewrite</button>
+
+      <!-- Result Actions (initially hidden) -->
+      <div id="result-actions" style="display: none;">
+        <button id="copy-result" class="action-button copy-button">Copy</button>
+        <button id="replace-text" class="action-button submit-button">Replace</button>
+        <button id="new-rewrite" class="action-button cancel-button">New Rewrite</button>
+      </div>
     </div>
   `;
   
@@ -284,8 +303,8 @@ chrome.runtime.onMessage.addListener((request) => {
       break;
       
     case "RESULT":
-      // Show result in floating window instead of automatically replacing
-      showResultWindow(originalText, request.text);
+      // Update existing floating window with result
+      updateFloatingWindowWithResult(request.text);
       break;
       
     case "ERROR":
@@ -478,4 +497,65 @@ function replaceSelectedText(newText) {
 
   showNotification('Please select text in an editable area', true);
   return false;
+}
+
+function updateFloatingWindowWithResult(rewrittenText) {
+  if (!floatingWindow) return;
+
+  // Show result section
+  const resultSection = floatingWindow.querySelector('#result-section');
+  const resultActions = floatingWindow.querySelector('#result-actions');
+  const submitButton = floatingWindow.querySelector('#submit-prompt');
+  const cancelButton = floatingWindow.querySelector('#cancel-prompt');
+
+  if (resultSection) resultSection.style.display = 'block';
+  if (resultActions) resultActions.style.display = 'block';
+  if (submitButton) submitButton.style.display = 'none';
+  if (cancelButton) cancelButton.style.display = 'none';
+
+  // Update rewritten text
+  const rewrittenTextDisplay = floatingWindow.querySelector('#rewritten-text-display');
+  if (rewrittenTextDisplay) {
+    rewrittenTextDisplay.textContent = rewrittenText;
+  }
+
+  // Add event listeners for result actions
+  const copyBtn = floatingWindow.querySelector('#copy-result');
+  const replaceBtn = floatingWindow.querySelector('#replace-text');
+  const newRewriteBtn = floatingWindow.querySelector('#new-rewrite');
+
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(rewrittenText).then(() => {
+        showNotification('Text copied to clipboard!');
+      });
+    };
+  }
+
+  if (replaceBtn) {
+    replaceBtn.onclick = () => {
+      const success = replaceSelectedText(rewrittenText);
+      if (success) {
+        floatingWindow.remove();
+        showNotification('Text replaced successfully!');
+      }
+    };
+  }
+
+  if (newRewriteBtn) {
+    newRewriteBtn.onclick = () => {
+      // Reset to input mode
+      if (resultSection) resultSection.style.display = 'none';
+      if (resultActions) resultActions.style.display = 'none';
+      if (submitButton) submitButton.style.display = 'block';
+      if (cancelButton) cancelButton.style.display = 'block';
+
+      // Clear and focus prompt input
+      const promptInput = floatingWindow.querySelector('#custom-prompt-input');
+      if (promptInput) {
+        promptInput.value = '';
+        promptInput.focus();
+      }
+    };
+  }
 }
