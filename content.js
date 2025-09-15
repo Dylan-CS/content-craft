@@ -257,8 +257,10 @@ function showFloatingWindow(text) {
     
     if (customPrompt) {
       processTextWithCustomPrompt(originalText, customPrompt);
-      floatingWindow.remove();
-      removeHoverButton();
+      // Don't remove window - we'll update it with results
+      // Show processing state
+      submitBtn.textContent = 'Processing...';
+      submitBtn.disabled = true;
     } else {
       promptInput.style.borderColor = '#e74c3c';
       setTimeout(() => {
@@ -309,6 +311,14 @@ chrome.runtime.onMessage.addListener((request) => {
       
     case "ERROR":
       showNotification(request.message, true);
+      // Reset submit button if window still exists
+      if (floatingWindow) {
+        const submitBtn = floatingWindow.querySelector('#submit-prompt');
+        if (submitBtn) {
+          submitBtn.textContent = 'Rewrite';
+          submitBtn.disabled = false;
+        }
+      }
       break;
   }
 });
