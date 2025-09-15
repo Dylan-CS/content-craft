@@ -31,10 +31,10 @@ document.addEventListener('mousedown', function(e) {
 
 function showHoverButton(text) {
   removeHoverButton();
-  
+
   hoverButton = document.createElement('div');
   hoverButton.className = 'ai-rewrite-hover-button';
-  hoverButton.innerHTML = '✨ AI Rewrite';
+  hoverButton.innerHTML = '✨';
   
   hoverButton.addEventListener('mousedown', function(e) {
     e.stopPropagation();
