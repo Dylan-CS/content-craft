@@ -284,14 +284,19 @@ function showFloatingWindow(text) {
 
 function processTextWithCustomPrompt(text, customPrompt) {
   console.log('Sending message to background script');
-  chrome.runtime.sendMessage({
-    type: "PROCESS_WITH_CUSTOM_PROMPT",
-    text: text,
-    prompt: customPrompt
-  }).catch(error => {
-    console.error('Error sending message to background:', error);
-    showNotification('Extension communication error', true);
-  });
+  try {
+    chrome.runtime.sendMessage({
+      type: "PROCESS_WITH_CUSTOM_PROMPT",
+      text: text,
+      prompt: customPrompt
+    }).catch(error => {
+      console.error('Error sending message to background:', error);
+      showNotification('Extension communication error', true);
+    });
+  } catch (error) {
+    console.error('Extension context invalidated:', error);
+    showNotification('Extension context invalidated - please refresh the page', true);
+  }
 }
 
 chrome.runtime.onMessage.addListener((request) => {
