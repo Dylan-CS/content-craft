@@ -259,18 +259,8 @@ chrome.runtime.onMessage.addListener((request) => {
       break;
       
     case "RESULT":
-      chrome.runtime.sendMessage({
-        type: "SHOW_RESULT_IN_POPUP",
-        text: request.text,
-        originalText: originalText
-      });
-      
-      const success = replaceSelectedText(request.text);
-      if (!success) {
-        chrome.runtime.sendMessage({
-          type: "REPLACEMENT_FAILED"
-        });
-      }
+      // Show result in floating window instead of automatically replacing
+      showResultWindow(originalText, request.text);
       break;
       
     case "ERROR":
@@ -278,6 +268,89 @@ chrome.runtime.onMessage.addListener((request) => {
       break;
   }
 });
+
+function showResultWindow(originalText, rewrittenText) {
+  // Remove any existing result window
+  const existingWindow = document.querySelector('.ai-rewrite-result-window');
+  if (existingWindow) {
+    existingWindow.remove();
+  }
+
+  const resultWindow = document.createElement('div');
+  resultWindow.className = 'ai-rewrite-result-window';
+  resultWindow.innerHTML = `
+    <div class="floating-window-header">
+      <span>AI Rewrite Result</span>
+      <button id="close-result" class="close-button">×</button>
+    </div>
+    <div style="margin-bottom: 12px;">
+      <div class="section-title">Original Text:</div>
+      <div class="selected-text-display">
+        ${originalText.length > 150 ? originalText.substring(0, 150) + '...' : originalText}
+      </div>
+    </div>
+    <div style="margin-bottom: 12px;">
+      <div class="section-title">Rewritten Text:</div>
+      <div class="selected-text-display" style="background: #e8f5e8; border-color: #c8e6c9;">
+        ${rewrittenText.length > 150 ? rewrittenText.substring(0, 150) + '...' : rewrittenText}
+      </div>
+    </div>
+    <div style="margin-bottom: 12px;">
+      <div class="section-title">Actions:</div>
+      <div class="action-buttons-container">
+        <button id="copy-result" class="action-button submit-button" style="background: #27ae60;">Copy Result</button>
+        <button id="replace-text" class="action-button submit-button">Replace on Page</button>
+        <button id="close-result-btn" class="action-button cancel-button">Close</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(resultWindow);
+
+  // Position the result window
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const windowWidth = 400;
+  const windowHeight = resultWindow.offsetHeight || 300;
+
+  resultWindow.style.top = ((viewportHeight - windowHeight) / 2) + 'px';
+  resultWindow.style.left = ((viewportWidth - windowWidth) / 2) + 'px';
+
+  // Add event listeners
+  resultWindow.querySelector('#close-result').addEventListener('click', () => {
+    resultWindow.remove();
+  });
+
+  resultWindow.querySelector('#close-result-btn').addEventListener('click', () => {
+    resultWindow.remove();
+  });
+
+  resultWindow.querySelector('#copy-result').addEventListener('click', () => {
+    navigator.clipboard.writeText(rewrittenText).then(() => {
+      showNotification('Text copied to clipboard!');
+    });
+  });
+
+  resultWindow.querySelector('#replace-text').addEventListener('click', () => {
+    const success = replaceSelectedText(rewrittenText);
+    if (success) {
+      resultWindow.remove();
+      showNotification('Text replaced successfully!');
+    }
+  });
+
+  // Close on outside click
+  const closeOnClickOutside = function(e) {
+    if (resultWindow && !resultWindow.contains(e.target)) {
+      resultWindow.remove();
+      document.removeEventListener('mousedown', closeOnClickOutside);
+    }
+  };
+
+  setTimeout(() => {
+    document.addEventListener('mousedown', closeOnClickOutside);
+  }, 100);
+}
 
 function showNotification(message, isError = false) {
   const notification = document.createElement('div');

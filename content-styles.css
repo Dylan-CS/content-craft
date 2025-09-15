@@ -144,6 +144,20 @@
   font-weight: 500;
 }
 
+/* Result Window Styles */
+.ai-rewrite-result-window {
+  position: fixed;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  width: 400px;
+  max-width: 90vw;
+  z-index: 2147483647;
+  border: 1px solid #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
 /* Notification Styles */
 .ai-rewrite-notification {
   position: fixed;
