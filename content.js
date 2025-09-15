@@ -15,6 +15,11 @@ document.addEventListener('mouseup', function() {
 // Hide button when clicking elsewhere
 document.addEventListener('mousedown', function(e) {
   if (hoverButton && !hoverButton.contains(e.target) && e.target.id !== 'close-float') {
+    // Check if the click is on the AI rewrite button itself
+    if (e.target === hoverButton || hoverButton.contains(e.target)) {
+      return; // Don't remove button when clicking on it
+    }
+
     // Use longer timeout to ensure click events can process
     setTimeout(() => {
       if (hoverButton && !hoverButton.contains(e.target)) {
