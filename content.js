@@ -12,13 +12,14 @@ document.addEventListener('mouseup', function() {
   }
 });
 
-// Hide button when clicking elsewhere
+// Hide button when clicking elsewhere (simplified)
 document.addEventListener('mousedown', function(e) {
-  if (hoverButton && !hoverButton.contains(e.target) && e.target.id !== 'close-float') {
-    // Only remove button if clicking outside, not on the button itself
-    if (e.target !== hoverButton && !hoverButton.contains(e.target)) {
-      removeHoverButton();
-    }
+  console.log('Global mousedown event, target:', e.target?.className || e.target);
+  if (hoverButton && e.target !== hoverButton && !hoverButton.contains(e.target)) {
+    console.log('Removing hover button due to outside click');
+    removeHoverButton();
+  } else if (hoverButton && (e.target === hoverButton || hoverButton.contains(e.target))) {
+    console.log('Click on hover button - allowing click event to proceed');
   }
 });
 
@@ -30,9 +31,11 @@ function showHoverButton(text) {
   hoverButton.innerHTML = '✨';
   
   document.body.appendChild(hoverButton);
+  console.log('Button appended to DOM with class:', hoverButton.className);
 
   // Add event listeners AFTER the button is in the DOM
   hoverButton.addEventListener('mousedown', function(e) {
+    console.log('Button mousedown event');
     e.stopPropagation();
   });
 
