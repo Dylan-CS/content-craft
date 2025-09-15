@@ -41,8 +41,10 @@ function showHoverButton(text) {
   });
   
   hoverButton.addEventListener('click', function(e) {
+    console.log('AI rewrite button clicked');
     e.preventDefault();
     e.stopPropagation();
+    console.log('Calling showFloatingWindow with text:', text);
     showFloatingWindow(text);
     return false;
   });
@@ -71,6 +73,7 @@ function showHoverButton(text) {
   
   hoverButton.style.display = 'block';
   hoverButton.style.visibility = 'visible';
+  console.log('Hover button created and positioned');
 }
 
 function removeHoverButton() {
@@ -143,6 +146,7 @@ function showFloatingWindow(text) {
   `;
   
   document.body.appendChild(floatingWindow);
+  console.log('Floating window appended to body');
 
   // --- Start: New window positioning logic ---
   let topPos, leftPos;
